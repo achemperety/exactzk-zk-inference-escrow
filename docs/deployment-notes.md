@@ -4,9 +4,7 @@ These notes record what the testnet deployment does and what it was checked agai
 
 ## Deployed
 
-**2026-11-24, from commit `07d7e1c`, Base Sepolia blocks 62,968,700 to 62,968,830.** 13 transactions, all successful, 16,869,040 gas, 0.000101 ETH including L1 data fees. The addresses of our contracts and the two verifier ids are in [deployments/base-sepolia.json](../deployments/base-sepolia.json). The deployer is a testnet-only account and is not recorded in this repository. `07d7e1c` is the commit of the development repository the deployment was built from; this repository's `src/` and `script/` are that commit's sources, apart from the comment noted next.
-
-ProofValidator8004 verifies as a partial match: one source comment differs from the deployed build; an exact match will follow.
+**2026-11-24, from commit `07d7e1c`, Base Sepolia blocks 62,968,700 to 62,968,830.** 13 transactions, all successful, 16,869,040 gas, 0.000101 ETH including L1 data fees. The addresses of our contracts and the two verifier ids are in [deployments/base-sepolia.json](../deployments/base-sepolia.json). The deployer is a testnet-only account and is not recorded in this repository. `07d7e1c` is the commit of the development repository the deployment was built from; this repository's `src/` and `script/` are that commit's sources, apart from one reworded comment in `src/ProofValidator8004.sol`. The contracts are compiled without a metadata hash (`cbor_metadata = false` in `foundry.toml`), so the comment changes no bytecode, and an explorer can report a code match but not an exact one. Verified 2026-11-24: on Sourcify, all seven contracts match on creation and runtime code, and the two verifiers, deployed as raw runtime bytes, on runtime code; on Blockscout, the seven contracts are verified (partially).
 
 `python3 scripts/check_deployment.py <Forge's broadcast file> https://sepolia.base.org` reads every receipt and contract back from the chain and found everything as intended:
 
