@@ -98,9 +98,9 @@ The client binds `receiverAuthorizer` into the salt as `auth-capture` prescribes
 
 ## Error codes
 
-Every contract error maps to one outcome of [proof_condition.md](./proof_condition.md#outcomes-of-a-check) and one `errorReason`. The `auth-capture` reasons are defined in [Status words](./auth_capture_policy_evm.md#status-words). The reference middleware and clients (`clients/`, `x402/`) still use the names in the last column for the native contracts.
+Every contract error maps to one outcome of [proof_condition.md](./proof_condition.md#outcomes-of-a-check) and one `errorReason`. The `auth-capture` reasons are defined in [Status words](./auth_capture_policy_evm.md#status-words), and the reference middleware and clients (`clients/`, `x402/`) emit them for the native contracts too. The last column gives the names v3.0.0-testnet emitted. The middleware now emits the specification's names for the two proof failures, and still emits the names in the last column for the other errors.
 
-| Contract error | Outcome | `auth-capture` reason | Reference middleware's reason |
+| Contract error | Outcome | `errorReason` | Emitted by v3.0.0-testnet |
 |---|---|---|---|
 | `ProofInvalid()` | Invalid | `invalid_auth_capture_evm_proof_invalid` | `invalid_proof_gated_evm_invalid_proof` |
 | `VerifierUnavailable(bytes32)` | Unverifiable | `invalid_auth_capture_evm_verifier_unavailable` | `invalid_proof_gated_evm_verifier_unavailable` |

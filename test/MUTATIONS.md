@@ -805,3 +805,20 @@ Run on 2026-11-25. The work adds 42 tests that run in CI: 24 in `ProofCapturePol
 ### Survivor
 
 - **G4** (the gate does not check the path's length). Equivalent as far as a test can tell: a path of the wrong length opens the root only if a leaf hash, the hash of 96 bytes, equals an inner node, the hash of 64, or the hash chain continues past the root to equal it, and either needs a keccak256 collision or preimage. The check stays as defence in depth; the proposal lists the tree encoding as an open point.
+
+## The reason names of the specification in the middleware, the server and the client
+
+Run on 2026-11-25. The middleware (`clients/python`), the x402 server (`x402/server`) and the client (`clients/ts`) now emit `invalid_auth_capture_evm_proof_invalid` and `invalid_auth_capture_evm_verifier_unavailable`, as the specification names them. `bash clients/e2e/run.sh` (36 checks) and `bash x402/run_e2e.sh` pass with the new names. 4 unit tests are added in `clients/ts/test/reasons.test.ts`, for the client's own map from a revert to a reason, which neither end-to-end run reaches; with the 19 in `refusal.test.ts`, `npm test` runs 23. The rows SV1 and MW1 above quote the names of their own run, v3.0.0-testnet's.
+
+8 mutations were run, each file restored byte for byte afterwards. All were caught, CL3 only once `reasons.test.ts` existed.
+
+| Id | Deliberate breakage | What failed |
+|---|---|---|
+| MW1r | middleware: both proof failures reported as one errorReason | `clients/e2e/run.sh` exits 1 at the three `wrong-entry -> invalid_auth_capture_evm_verifier_unavailable` checks |
+| MW2 | middleware: v3.0.0-testnet's name for an invalid proof | the three `tampered -> invalid_auth_capture_evm_proof_invalid` checks |
+| MW3 | middleware: v3.0.0-testnet's name for an uncheckable proof | the three `wrong-entry -> invalid_auth_capture_evm_verifier_unavailable` checks |
+| SV1r | server: both proof failures reported as one errorReason | `x402/run_e2e.sh` exits 1 at "FAILED: proof-gated/authorization/wrong-entry -> invalid_auth_capture_evm_verifier_unavailable" |
+| SV3 | server: v3.0.0-testnet's names for both | `x402/run_e2e.sh` exits 1 at the first failure check |
+| CL3 | client: v3.0.0-testnet's names in its revert map | **not caught by `clients/e2e/run.sh`** (the map is used only when the client settles directly); after `reasons.test.ts` was added, 3: "an invalid proof is reported with the specification's name", "an uncheckable proof is reported with the specification's name, never as invalid", "the revert is found inside a wrapping error" |
+| CL4 | client: an uncheckable proof mapped to the invalid-proof reason | 1: "an uncheckable proof is reported with the specification's name, never as invalid" |
+| CL5 | client: any `Error`, not only a viem error, is searched for a revert | 1: "something that is not a revert has no reason" |

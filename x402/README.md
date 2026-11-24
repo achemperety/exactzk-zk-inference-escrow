@@ -106,8 +106,8 @@ The server relays the collect call (`operator.authorize`) before the resource an
 
 | Failure | `errorReason` |
 |---|---|
-| The proof was checked and rejected (`ProofInvalid`) | `invalid_proof_gated_evm_invalid_proof` |
-| The proof could not be checked: unknown verifier, an entry that is not the registered one, or code that is not the registered code (`VerifierUnavailable`) | `invalid_proof_gated_evm_verifier_unavailable` |
+| The proof was checked and rejected (`ProofInvalid`) | `invalid_auth_capture_evm_proof_invalid` |
+| The proof could not be checked: unknown verifier, an entry that is not the registered one, or code that is not the registered code (`VerifierUnavailable`) | `invalid_auth_capture_evm_verifier_unavailable` |
 | `proveBy` passed (`Expired`) | `invalid_proof_gated_evm_expired` |
 | Terms or authorization do not match the offer | `invalid_proof_gated_evm_terms_mismatch`, `…_nonce_mismatch`, `…_authorization_mismatch`, `…_prove_by` |
 | The auth-capture salt is not bound to the terms | `invalid_auth_capture_evm_salt_binding_mismatch` (x402's own code) |
@@ -124,12 +124,12 @@ Every `PaymentRequired`, `PaymentRequirements` and `PaymentPayload` the run prod
 |---|---|
 | `proof-gated`, authorization, real proof | 200; 1 USDC from payer to payTo; output delivered |
 | `proof-gated`, escrow, real proof | 200; locked, then released |
-| `proof-gated`, each flow, tampered proof | 402, `invalid_proof_gated_evm_invalid_proof`; nothing paid (escrow: stays locked, refundable after `proveBy`) |
-| `proof-gated`, each flow, wrong entry | 402, `invalid_proof_gated_evm_verifier_unavailable`; nothing paid |
+| `proof-gated`, each flow, tampered proof | 402, `invalid_auth_capture_evm_proof_invalid`; nothing paid (escrow: stays locked, refundable after `proveBy`) |
+| `proof-gated`, each flow, wrong entry | 402, `invalid_auth_capture_evm_verifier_unavailable`; nothing paid |
 | `auth-capture`, x402's client, real proof | 200; held, then captured for payTo |
 | `auth-capture`, offer not bound to its terms | the proof-aware check refuses to sign; nothing moves |
-| `auth-capture`, wrong entry | 402, `invalid_proof_gated_evm_verifier_unavailable`; held, not captured |
-| `auth-capture`, tampered proof | 402, `invalid_proof_gated_evm_invalid_proof`; held, not captured; after the capture deadline the payer reclaims it all |
+| `auth-capture`, wrong entry | 402, `invalid_auth_capture_evm_verifier_unavailable`; held, not captured |
+| `auth-capture`, tampered proof | 402, `invalid_auth_capture_evm_proof_invalid`; held, not captured; after the capture deadline the payer reclaims it all |
 
 Objects validated in one run: 10 `PaymentRequired`, 30 `PaymentRequirements`, 9 `PaymentPayload`, 9 `SettleResponse`. Peak memory: client 242 MB, server 74 MB, local node 30 MB.
 

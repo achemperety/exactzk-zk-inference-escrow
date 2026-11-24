@@ -38,8 +38,8 @@ Without a `PAYMENT-SIGNATURE` header, a request gets 402 with `PAYMENT-REQUIRED`
 
 | Contract error | `errorReason` |
 |---|---|
-| `ProofInvalid()`: the proof was checked and rejected | `invalid_proof_gated_evm_invalid_proof` |
-| `VerifierUnavailable(bytes32)`: unknown verifier, an entry that is not the registered one, or code that is not the registered code | `invalid_proof_gated_evm_verifier_unavailable` |
+| `ProofInvalid()`: the proof was checked and rejected | `invalid_auth_capture_evm_proof_invalid` |
+| `VerifierUnavailable(bytes32)`: unknown verifier, an entry that is not the registered one, or code that is not the registered code | `invalid_auth_capture_evm_verifier_unavailable` |
 | `Expired()`, `AlreadyOpened`, `NotOpen`, `TermsMismatch()`, `TransferFailed()`, `InsufficientGasForVerifier` | `invalid_proof_gated_evm_expired`, `…_payment_already_used`, `…_not_open`, `…_terms_mismatch`, `…_transfer_failed`, `…_insufficient_gas` |
 | Checks before any call | `invalid_proof_gated_evm_terms_mismatch`, `…_nonce_mismatch`, `…_authorization_mismatch`, `…_prove_by`, `…_prover_commitment_mismatch`, `invalid_auth_capture_evm_extra`, `…_salt_binding_mismatch` |
 
