@@ -51,10 +51,11 @@ SALT_BINDING_TYPEHASH = keccak(text="x402AuthCaptureSaltBinding(address receiver
 PROOF_TERMS_TYPEHASH = keccak(text="ProofGatedTerms(bytes32 verifierId,bytes32 inputCommitment)")
 
 # Contract errors and the x402 `errorReason` each becomes. The first two are the distinct pair the
-# x402 discussion agreed on: the proof was checked and rejected, or it could not be checked.
+# x402 discussion agreed on: the proof was checked and rejected, or it could not be checked. Their
+# names are the specification's (specs/schemes/proof-gated/auth_capture_policy_evm.md, "Status words").
 ERROR_REASONS = {
-    "ProofInvalid()": "invalid_proof_gated_evm_invalid_proof",
-    "VerifierUnavailable(bytes32)": "invalid_proof_gated_evm_verifier_unavailable",
+    "ProofInvalid()": "invalid_auth_capture_evm_proof_invalid",
+    "VerifierUnavailable(bytes32)": "invalid_auth_capture_evm_verifier_unavailable",
     "Expired()": "invalid_proof_gated_evm_expired",
     "AlreadyOpened(bytes32)": "invalid_proof_gated_evm_payment_already_used",
     "NotOpen(bytes32)": "invalid_proof_gated_evm_not_open",

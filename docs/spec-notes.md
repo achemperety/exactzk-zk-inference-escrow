@@ -47,4 +47,4 @@ The payer's signature covers the escrow's `PaymentInfo`, whose salt x402's clien
 
 ## Open points for the specification
 
-- **Names of the two error reasons.** The specification fixes them. The x402 server in `x402/` uses `invalid_proof_gated_evm_invalid_proof` and `invalid_proof_gated_evm_verifier_unavailable`, after x402's convention of naming a binding's reasons `invalid_<scheme>_evm_*` ("proof-gated" being the working name of the scheme).
+- **Names of the two error reasons.** The specification fixes them as `invalid_auth_capture_evm_proof_invalid` and `invalid_auth_capture_evm_verifier_unavailable` (`specs/schemes/proof-gated/auth_capture_policy_evm.md`, "Status words"), and the server in `x402/`, the middleware and the client use those names. The names v3.0.0-testnet emitted are in the error table of `specs/schemes/proof-gated/reference_evm.md`.

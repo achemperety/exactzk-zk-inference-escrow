@@ -160,7 +160,7 @@ async function main() {
   console.log("\nerrorReason values seen:", JSON.stringify(reasons, null, 2));
   console.log("validated against x402's definitions:", JSON.stringify(counts));
   for (const [k, v] of Object.entries(reasons)) {
-    const want = k.endsWith("tampered") ? "invalid_proof_gated_evm_invalid_proof" : "invalid_proof_gated_evm_verifier_unavailable";
+    const want = k.endsWith("tampered") ? "invalid_auth_capture_evm_proof_invalid" : "invalid_auth_capture_evm_verifier_unavailable";
     expect(v === want, `${k} -> ${want}`);
   }
 }

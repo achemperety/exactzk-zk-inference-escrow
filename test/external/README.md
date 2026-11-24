@@ -67,6 +67,18 @@ None of these blocks a test. They change what a reader of the registry can concl
 | Deployed in tests | `AuthCaptureEscrow` and `ERC3009PaymentCollector` placed at the canonical v1.1 addresses the binding publishes, with Forge's `deployCodeTo` (the constructor runs at the target address), on chain id 84532: x402's own client signs for those addresses (`test/AuthCaptureBase.sol`, `script/X402LocalChain.s.sol`) |
 | On the testnet | Both are deployed at those addresses on the target testnet and equal this source built with its deploy profile, metadata removed and immutables zeroed (`scripts/escrow_live_check.py`; `docs/deployment-notes.md`). The testnet `AuthCaptureProofOperator` uses that escrow |
 
+## x402 `batch-settlement`: the channel contract
+
+| | |
+|---|---|
+| Source | `x402-foundation/x402`, `contracts/evm/src/x402BatchSettlement.sol` and `contracts/evm/src/interfaces/IDepositCollector.sol` |
+| Pinned at | Commit `d7d0a43501c6a9ddbabe770ee2e48b3d8f0e466d` (2026-11-24), the repository's head when copied. Both files were last changed at commit `84ffb6412a1f2f45a62971c5549eff794281c099` (2026-05-15) |
+| Files here | `x402/src/x402BatchSettlement.sol`, SHA-256 `42ef0aac79f45d66a1f842d280dcaee69900e7d71b4d79add6cddf65ca220b98`; `x402/src/interfaces/IDepositCollector.sol`, SHA-256 `01a18a728c0bb9a814e7287a57fe597b755bfe2e6478f9eb1c70a05489656925`. Byte for byte, at the same relative paths, so the contract's own import resolves. `forge fmt` skips them |
+| Built with | OpenZeppelin Contracts v5.7.0 (`lib/openzeppelin-contracts`), through a context remapping in `foundry.toml`. x402 pins v5.5.0 (`fcbae5394ae8ad52d8e580a3477db99814b9d565`); v5.4.0, which the other third-party code here uses, lacks `ECDSA.recoverCalldata` |
+| Used by | Only the `batch-settlement` claim-gate prototype, `test/experimental/batch-gate/`. A test-only collector pulls deposits from an approved test token |
+
+x402 compiles it with solc 0.8.28, 200 optimiser runs, without `via_ir`, for Cancun; here it gets this repository's settings. The gate's claim gas includes the channel contract's `claim` compiled this way.
+
 ## x402's TypeScript packages
 
 `@x402/core` (types, zod schemas, header encoding, the client) and `@x402/evm` (the `auth-capture` client scheme) at `x402-foundation/x402` commit `3eb54b2984a955118845115b3fd5db4c926d0382`, fetched from source by `x402/fetch_x402.sh` and not tracked. See `x402/README.md`.

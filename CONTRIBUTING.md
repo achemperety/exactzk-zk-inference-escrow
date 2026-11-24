@@ -29,7 +29,7 @@ All must pass. CI runs the same commands, and compiles the Python middleware.
 |---|---|
 | `src/` | Contracts |
 | `test/` | Foundry tests; `test/fixtures/` holds real proofs and verifier bytecode |
-| `specs/` | The draft x402 scheme specification; `REVIEW.md` lists its requirements and numbers with their sources |
+| `specs/` | The draft x402 specification of a proof condition on `auth-capture` and `batch-settlement`; `REVIEW.md` lists its requirements and numbers with their sources |
 | `clients/` | The TypeScript client and the Python server middleware |
 | `circuits/spike-mlp/` | Pinned circuit inputs and the scripts that regenerate verifiers from them |
 | `measurements/` | Scripts and results of the gas and proving measurements; `experimental/` holds variants with new keys, none canonical |
@@ -38,7 +38,7 @@ All must pass. CI runs the same commands, and compiles the Python middleware.
 
 ## Changing the specification
 
-Every MUST and SHOULD in `specs/schemes/proof-gated/` and every number in it is listed in `specs/schemes/proof-gated/REVIEW.md` with where it is enforced or measured. A change to the specification updates that list in the same commit. A number in the specification must come from a measurement in this repository and name its source.
+Every MUST, SHOULD and MAY in `specs/schemes/proof-gated/` and every number in it is listed in `specs/schemes/proof-gated/REVIEW.md` with where it is enforced or measured. A change to the specification updates that list in the same commit. A number in the specification must come from a measurement in this repository and name its source.
 
 ## Style
 

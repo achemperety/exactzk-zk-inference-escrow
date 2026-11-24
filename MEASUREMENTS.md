@@ -113,6 +113,11 @@ Steady unless marked. "Test token" and "USDC" as above.
 | ERC-8004 `respond`: first answer, 100; first answer, 0; answered before | 803,767; 783,939; 724,184 | | the same |
 | x402 auth-capture: `authorize` + `captureWithProof` | 862,189 | 895,250 | `test/AuthCaptureGas.t.sol` |
 | x402 auth-capture: `chargeWithProof` | 812,420 | 836,981 | the same |
+| x402 auth-capture, proof policy: `authorize` + `captureWithPolicy` | 866,257 (126,385 + 739,872) | 899,361 (148,643 + 750,718) | `test/ProofCapturePolicyGas.t.sol` |
+| x402 auth-capture, proof policy: `chargeWithPolicy` | 816,774 | 841,355 | the same |
+| x402 batch-settlement claim gate (PROTOTYPE): `claimWithProof`, steady; the channel's first claim | 769,210; 797,428 | the same: a claim moves no token | `test/experimental/batch-gate/ProofClaimGate.t.sol` |
+
+The proof policy against the terms-authorizer operator, steady, test token: `captureWithPolicy` 739,872 = 21,000 + 72,280 call data + 646,592 execution; `captureWithProof` 735,804 = 21,000 + 71,696 + 643,108. The 4,068 difference is 584 of call data and 3,484 of execution: `policyData` is one ABI-encoded `bytes` argument decoded into memory, and the check is one more call, into the policy. `chargeWithPolicy` against `chargeWithProof`: 596 and 3,758, 4,354 in all. The gate's claim, test token: first 797,428 = 21,000 + 76,272 + 700,156; steady 769,210 = 21,000 + 75,760 + 672,450. Every account cold, as above; the gate's channel contract is x402's, built with this repository's compiler settings (`test/external/README.md`).
 
 The first-time rows of these transactions are in the measurement folders named. Of each `settle`, `release`, `evaluate` and `respond`, 577,544 is the generated solo verifier and 13,213 the rest of the proof check (registry, adapter, code-hash reads).
 

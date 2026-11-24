@@ -46,6 +46,8 @@ The pinned circuits use a structured reference string that was generated locally
 - The operator relies on x402's escrow (base/commerce-payments v1.1.0) for amounts, deadlines, fees and the payer's `reclaim`. The tests run against that escrow built from source. The escrow and ERC-3009 collector at the canonical addresses on Base Sepolia were compared with that source on 2026-11-24 (`docs/deployment-notes.md`); they are someone else's contracts, and the comparison says nothing about other chains.
 - The operator has no refund entry point. Once a hold is captured, getting money back to the payer is outside this contract.
 - The x402 server in `x402/` is a demonstration: it holds no key, sends from a local node's unlocked account, and serves one stored proof.
+- `ProofCapturePolicy` binds the terms through the client's salt nonce, derived from the verifier id and the input commitment, so the binding is the full 256-bit hash rather than a 160-bit address. A client that draws the salt nonce at random, as x402's own client does, cannot be captured under it; its hold goes back to it after the capture deadline. The policy does not constrain the amount or the fee: `PolicyCaptureOperator` takes the whole hold and the payer's minimum fee, and under the reserved `"policy"` type the authorizer's signature would fix them.
+- The `batch-settlement` claim gate (`test/experimental/batch-gate/`) is a prototype for a proposal. A gate is only a condition if it is the channel's receiver as well as its receiver authorizer, because x402's channel contract lets the receiver claim directly; its channels have no relayed claims and no cooperative refunds.
 
 ## The Groth16 prototype is a prototype
 
@@ -56,7 +58,7 @@ The pinned circuits use a structured reference string that was generated locally
 
 ## Known limits of the specification draft
 
-`specs/schemes/proof-gated/` is a draft for discussion with the x402 maintainers, not an accepted x402 scheme. `proof-gated` is a working name. There is no facilitator implementation: the reference server settles directly, and the `/supported` fields and two of the error codes in the draft are specified but not implemented.
+`specs/schemes/proof-gated/` is a draft for discussion with the x402 maintainers, not accepted by x402. It proposes the proof as a condition on `auth-capture` (a normative policy profile) and on `batch-settlement` (a proposal, not normative); the folder keeps its earlier working name. There is no facilitator implementation: the reference server settles directly, and the facilitator steps of the policy profile are specified but not implemented. The policy profile assumes two changes to `auth-capture`'s reserved `"policy"` type that its maintainers have not agreed to: a status word instead of a boolean, and a `policyData` parameter. `ProofCapturePolicy` and `PolicyCaptureOperator` are tested against the escrow built from source and are not deployed. The `batch-settlement` claim gate is a test-only prototype.
 
 ## Known limits of the clients and the quickstart
 

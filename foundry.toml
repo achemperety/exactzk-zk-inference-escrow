@@ -17,7 +17,12 @@ libs = ["lib"]
 # x402's auth-capture escrow (lib/commerce-payments, base/commerce-payments v1.1.0), also used only
 # by tests, is built with its own dependencies as its remappings.txt names them: OpenZeppelin v5.0.2
 # (through its spend-permissions submodule) and solady.
+#
+# x402's batch-settlement channel contract (test/external/x402, copied from x402-foundation/x402), used
+# only by the batch-settlement gate prototype, needs ECDSA.recoverCalldata, which v5.4.0 lacks. x402 pins
+# OpenZeppelin v5.5.0; the nearest release here is v5.7.0, so the first remapping gives it that one.
 remappings = [
+    "test/external/x402/:@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
     "lib/openzeppelin-contracts-upgradeable/:@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
     "lib/erc-8004-contracts/:@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
     "test/external/:@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
@@ -65,6 +70,12 @@ show_metrics = true
 
 [fmt]
 line_length = 120
-# Pinned fixtures and the Groth16 prototype's exported verifier are generated files, and the ERC-8183
-# reference contract is copied from the ERC's text; all must stay byte-identical.
-ignore = ["test/fixtures/*", "test/external/erc8183/*", "test/experimental/groth16/Groth16Verifier.sol"]
+# Pinned fixtures and the Groth16 prototype's exported verifier are generated files, the ERC-8183
+# reference contract is copied from the ERC's text, and x402's batch-settlement contract is copied from
+# its repository; all must stay byte-identical.
+ignore = [
+    "test/fixtures/*",
+    "test/external/erc8183/*",
+    "test/external/x402/**/*",
+    "test/experimental/groth16/Groth16Verifier.sol",
+]

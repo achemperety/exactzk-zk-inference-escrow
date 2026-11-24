@@ -38,10 +38,11 @@ INPUT_COMMITMENT_FORMAT = "ezkl/poseidon/hashed-public/v1"
 PROOF_TERMS_TYPEHASH = keccak(text="ProofGatedTerms(bytes32 verifierId,bytes32 inputCommitment)")
 SALT_BINDING_TYPEHASH = keccak(text="x402AuthCaptureSaltBinding(address receiverAuthorizer,address policy,uint256 saltNonce)")
 
-# Contract errors and the errorReason each becomes; the first two are the agreed distinct pair.
+# Contract errors and the errorReason each becomes. The first two are the distinct pair, named as the
+# specification names them (specs/schemes/proof-gated/auth_capture_policy_evm.md, "Status words").
 ERROR_REASONS = {
-    "ProofInvalid()": "invalid_proof_gated_evm_invalid_proof",
-    "VerifierUnavailable(bytes32)": "invalid_proof_gated_evm_verifier_unavailable",
+    "ProofInvalid()": "invalid_auth_capture_evm_proof_invalid",
+    "VerifierUnavailable(bytes32)": "invalid_auth_capture_evm_verifier_unavailable",
     "Expired()": "invalid_proof_gated_evm_expired",
     "AlreadyOpened(bytes32)": "invalid_proof_gated_evm_payment_already_used",
     "NotOpen(bytes32)": "invalid_proof_gated_evm_not_open",

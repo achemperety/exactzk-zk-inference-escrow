@@ -73,10 +73,11 @@ export const ABI = {
   ]),
 };
 
-/** The agreed `errorReason` for each contract error; the first two are the distinct pair of rule 2. */
+/** The agreed `errorReason` for each contract error; the first two are the distinct pair of rule 2, named
+ * as the specification names them (`auth_capture_policy_evm.md`, "Status words"). */
 export const ERROR_REASONS: Record<string, string> = {
-  ProofInvalid: "invalid_proof_gated_evm_invalid_proof",
-  VerifierUnavailable: "invalid_proof_gated_evm_verifier_unavailable",
+  ProofInvalid: "invalid_auth_capture_evm_proof_invalid",
+  VerifierUnavailable: "invalid_auth_capture_evm_verifier_unavailable",
   Expired: "invalid_proof_gated_evm_expired",
   AlreadyOpened: "invalid_proof_gated_evm_payment_already_used",
   NotOpen: "invalid_proof_gated_evm_not_open",
