@@ -705,3 +705,103 @@ Run on 2026-11-24 on the Mac. 19 unit tests, no EZKL and no network: Keccak test
 | VM10 | the trailer is cut by its length field alone, without checking its form | 3 subtests of `test_rejects_other_forms` |
 
 On the server, one deliberately wrong input was run end to end: the pinned solo `settings.json` with its two range checks swapped. The script reported a different verifying key and verifier and exited 1 (`measurements/2026-11-24-verify-entry/`).
+
+## x402 shape (a): the proof policy and the batch-settlement claim gate
+
+Run on 2026-11-25. The work adds 42 tests that run in CI: 24 in `ProofCapturePolicy.t.sol`, 3 in `ProofCapturePolicyGas.t.sol` and 15 in `test/experimental/batch-gate/ProofClaimGate.t.sol`. Three more are opt-in USDC fork tests in `ProofCapturePolicyGas.t.sol`. With the earlier tests the suite is 440: 401 pass and 39 opt-in tests skip without a fork endpoint or the end-to-end run's files.
+
+59 mutations were run, each against the files that can catch it, and each source was restored byte for byte. 58 were caught. Every one of the 45 new tests fails under at least one of them; `test_fork_gas_policy_authorize_steady` only through its suite's `setUp` (FP3), like FX1. The tables below are from a run against the final tests. An earlier run of the first 51 mutations, against the suite before `test_the_verifier_receives_exactly_its_allowance_through_the_policy` and `test_arguments_that_do_not_fit_the_entry_are_invalid_through_the_policy` existed, caught 49: PC4 survived because the EZKL adapter repeats the output-size check, and PC5 because 599,000 gas still covers the solo proof. Those two tests were written for them; PC6 was added with them.
+
+### `src/ProofCapturePolicy.sol`, `src/ICapturePolicyStatus.sol` (`--match-path 'test/ProofCapturePolicy*.t.sol'`)
+
+| Id | Deliberate breakage | Tests that failed |
+|---|---|---|
+| PP1 | salt: not compared (any terms open any payment) | 3: `test_a_refused_attempt_leaves_the_authorization_capturable`, `test_terms_the_payer_did_not_sign_are_denied_not_proof_invalid`, `test_the_boolean_hooks_are_true_only_for_authorized` |
+| PP2 | policy address: any value accepted | 1: `test_a_salt_bound_to_another_policy_is_denied` |
+| PP3 | could-not-check reported as invalid | 5: `test_a_refused_attempt_leaves_the_authorization_capturable`, `test_a_refused_charge_moves_nothing_and_the_authorization_stays_usable`, `test_after_refusals_the_payer_reclaims_from_the_capture_deadline_on`, `test_an_unknown_entry_is_refused_with_verifier_unavailable_never_proof_invalid`, `test_changed_code_is_refused_with_verifier_unavailable_never_proof_invalid` |
+| PP4 | invalid reported as could-not-check | 6: `test_a_refused_attempt_leaves_the_authorization_capturable`, `test_a_refused_charge_moves_nothing_and_the_authorization_stays_usable`, `test_after_refusals_the_payer_reclaims_from_the_capture_deadline_on`, `test_an_invalid_proof_is_refused_with_proof_invalid`, `test_arguments_that_do_not_fit_the_entry_are_invalid_through_the_policy`, `test_terms_the_payer_did_not_sign_are_denied_not_proof_invalid` |
+| PP5 | invalid proof authorized | 7: `test_a_refused_attempt_leaves_the_authorization_capturable`, `test_a_refused_charge_moves_nothing_and_the_authorization_stays_usable`, `test_after_refusals_the_payer_reclaims_from_the_capture_deadline_on`, `test_an_invalid_proof_is_refused_with_proof_invalid`, `test_arguments_that_do_not_fit_the_entry_are_invalid_through_the_policy`, `test_terms_the_payer_did_not_sign_are_denied_not_proof_invalid`, `test_the_boolean_hooks_are_true_only_for_authorized` |
+| PP6 | could-not-check reported as denied | 5: `test_a_refused_attempt_leaves_the_authorization_capturable`, `test_a_refused_charge_moves_nothing_and_the_authorization_stays_usable`, `test_after_refusals_the_payer_reclaims_from_the_capture_deadline_on`, `test_an_unknown_entry_is_refused_with_verifier_unavailable_never_proof_invalid`, `test_changed_code_is_refused_with_verifier_unavailable_never_proof_invalid` |
+| PP7 | salt nonce ignores the input commitment | 2: `test_terms_the_payer_did_not_sign_are_denied_not_proof_invalid`, `test_the_status_words_and_the_salt_follow_the_derivation` |
+| PP8 | salt bound with policy zero whatever the data says | 1: `test_terms_the_payer_did_not_sign_are_denied_not_proof_invalid` |
+| PP9 | boolean capture hook true unless invalid | 1: `test_the_boolean_hooks_are_true_only_for_authorized` |
+| PP10 | boolean charge hook true unless invalid | 1: `test_the_boolean_hooks_are_true_only_for_authorized` |
+| PP11 | chargeStatus always authorized | 1: `test_a_refused_charge_moves_nothing_and_the_authorization_stays_usable` |
+| PP12 | captureStatus always authorized | 8: `test_a_refused_attempt_leaves_the_authorization_capturable`, `test_a_salt_bound_to_another_policy_is_denied`, `test_after_refusals_the_payer_reclaims_from_the_capture_deadline_on`, `test_an_invalid_proof_is_refused_with_proof_invalid`, `test_an_unknown_entry_is_refused_with_verifier_unavailable_never_proof_invalid`, `test_arguments_that_do_not_fit_the_entry_are_invalid_through_the_policy`, `test_changed_code_is_refused_with_verifier_unavailable_never_proof_invalid`, `test_terms_the_payer_did_not_sign_are_denied_not_proof_invalid` |
+| PP13 | ERC-165: any interface claimed | 1: `test_supports_its_interface_and_erc165_only` |
+| PP14 | status word: Authorized spelled otherwise | 1: `test_the_status_words_and_the_salt_follow_the_derivation` |
+| PP15 | status words: VerifierUnavailable collapsed into ProofInvalid | 1: `test_the_status_words_and_the_salt_follow_the_derivation` |
+
+### `src/ProofCheck.sol`, `checkOneInMemory` (`--match-path 'test/ProofCapturePolicy*.t.sol'`)
+
+| Id | Deliberate breakage | Tests that failed |
+|---|---|---|
+| PC1 | checkOneInMemory: code hashes not checked | 4: `test_a_refused_attempt_leaves_the_authorization_capturable`, `test_a_refused_charge_moves_nothing_and_the_authorization_stays_usable`, `test_after_refusals_the_payer_reclaims_from_the_capture_deadline_on`, `test_changed_code_is_refused_with_verifier_unavailable_never_proof_invalid` |
+| PC2 | checkOneInMemory: entry not compared with the registered hash | 1: `test_an_unknown_entry_is_refused_with_verifier_unavailable_never_proof_invalid` |
+| PC3 | checkOneInMemory: unknown id passes on to the code check | 1: `test_an_unknown_entry_is_refused_with_verifier_unavailable_never_proof_invalid` |
+| PC4 | checkOneInMemory: output size not checked | 1: `test_arguments_that_do_not_fit_the_entry_are_invalid_through_the_policy` |
+| PC5 | checkOneInMemory: verifier given 1,000 gas less than its allowance | 1: `test_the_verifier_receives_exactly_its_allowance_through_the_policy` |
+| PC6 | checkOneInMemory: lane count not checked | 1: `test_arguments_that_do_not_fit_the_entry_are_invalid_through_the_policy` |
+
+### `src/PolicyCaptureOperator.sol` (the same)
+
+| Id | Deliberate breakage | Tests that failed |
+|---|---|---|
+| PO1 | any non-zero word accepted | 9: `test_a_refused_attempt_leaves_the_authorization_capturable`, `test_a_refused_charge_moves_nothing_and_the_authorization_stays_usable`, `test_a_salt_bound_to_another_policy_is_denied`, `test_after_refusals_the_payer_reclaims_from_the_capture_deadline_on`, `test_an_invalid_proof_is_refused_with_proof_invalid`, `test_an_unknown_entry_is_refused_with_verifier_unavailable_never_proof_invalid`, `test_changed_code_is_refused_with_verifier_unavailable_never_proof_invalid`, `test_terms_the_payer_did_not_sign_are_denied_not_proof_invalid`, `test_the_operator_refuses_every_word_but_authorized` |
+| PO2 | the word is not checked | 9: `test_a_refused_attempt_leaves_the_authorization_capturable`, `test_a_refused_charge_moves_nothing_and_the_authorization_stays_usable`, `test_a_salt_bound_to_another_policy_is_denied`, `test_after_refusals_the_payer_reclaims_from_the_capture_deadline_on`, `test_an_invalid_proof_is_refused_with_proof_invalid`, `test_an_unknown_entry_is_refused_with_verifier_unavailable_never_proof_invalid`, `test_changed_code_is_refused_with_verifier_unavailable_never_proof_invalid`, `test_terms_the_payer_did_not_sign_are_denied_not_proof_invalid`, `test_the_operator_refuses_every_word_but_authorized` |
+| PO3 | every refusal reported as ProofInvalid | 8: `test_a_refused_attempt_leaves_the_authorization_capturable`, `test_a_refused_charge_moves_nothing_and_the_authorization_stays_usable`, `test_a_salt_bound_to_another_policy_is_denied`, `test_after_refusals_the_payer_reclaims_from_the_capture_deadline_on`, `test_an_unknown_entry_is_refused_with_verifier_unavailable_never_proof_invalid`, `test_changed_code_is_refused_with_verifier_unavailable_never_proof_invalid`, `test_terms_the_payer_did_not_sign_are_denied_not_proof_invalid`, `test_the_operator_refuses_every_word_but_authorized` |
+| PO4 | capture: one unit instead of the whole hold | 9: `test_a_hold_is_captured_once`, `test_a_payment_bound_with_the_policy_address_is_answered_too`, `test_a_refused_attempt_leaves_the_authorization_capturable`, `test_a_valid_proof_authorizes_and_anyone_captures_for_the_receiver`, `test_gas_capture_with_policy_steady`, `test_only_the_receiver_can_give_the_hold_back_early`, `test_the_fee_taken_is_the_payers_minimum`, `test_the_operator_refuses_every_word_but_authorized`, `test_too_little_gas_reverts_with_a_typed_error_not_a_refusal` |
+| PO5 | fee: the payer's maximum | 1: `test_the_fee_taken_is_the_payers_minimum` |
+| PO6 | charge: the escrow's charge reachable without the policy | 2: `test_gas_charge_with_policy_steady`, `test_the_escrows_charge_is_not_reachable_without_the_policy` |
+| PO7 | chargeWithPolicy: status not checked | 1: `test_a_refused_charge_moves_nothing_and_the_authorization_stays_usable` |
+| PO8 | chargeWithPolicy: less than the maximum | 3: `test_a_refused_charge_moves_nothing_and_the_authorization_stays_usable`, `test_charge_with_a_valid_proof_pays_the_receiver_in_one_step`, `test_gas_charge_with_policy_steady` |
+| PO9 | authorize: a partial amount accepted | 1: `test_authorize_must_collect_the_full_amount` |
+| PO10 | void: anyone | 1: `test_only_the_receiver_can_give_the_hold_back_early` |
+| PO11 | capture: event without the policy data hash | 1: `test_a_valid_proof_authorizes_and_anyone_captures_for_the_receiver` |
+| PO12 | charge: event with the wrong amount | 1: `test_charge_with_a_valid_proof_pays_the_receiver_in_one_step` |
+| PO13 | void: no event | 1: `test_only_the_receiver_can_give_the_hold_back_early` |
+| PO14 | capture: the hold read twice (gas) | 1: `test_gas_capture_with_policy_steady` |
+| PO15 | authorize: does not forward to the escrow | 13: `setUp` of the gas suite, `test_a_hold_is_captured_once`, `test_a_payment_bound_with_the_policy_address_is_answered_too`, `test_a_refused_attempt_leaves_the_authorization_capturable`, `test_a_valid_proof_authorizes_and_anyone_captures_for_the_receiver`, `test_after_refusals_the_payer_reclaims_from_the_capture_deadline_on`, `test_an_invalid_proof_is_refused_with_proof_invalid`, `test_an_unknown_entry_is_refused_with_verifier_unavailable_never_proof_invalid`, `test_changed_code_is_refused_with_verifier_unavailable_never_proof_invalid`, `test_only_the_receiver_can_give_the_hold_back_early`, `test_the_fee_taken_is_the_payers_minimum`, `test_the_operator_refuses_every_word_but_authorized`, `test_too_little_gas_reverts_with_a_typed_error_not_a_refusal` |
+| PO16 | authorize: the hold read once more (gas) | 1: `test_gas_policy_authorize_steady` |
+
+### `test/experimental/batch-gate/ProofClaimGate.sol` (`--match-path 'test/experimental/batch-gate/*.t.sol'`)
+
+| Id | Deliberate breakage | Tests that failed |
+|---|---|---|
+| G1 | leaf does not bind the position | 8: `test_a_check_that_cannot_run_is_unavailable_not_invalid`, `test_a_proven_request_at_its_signed_position_is_claimed_and_paid_out`, `test_an_invalid_proof_is_refused_and_the_position_stays_open`, `test_base_claimed_carries_earlier_batches`, `test_every_position_of_batches_of_one_to_nine_opens_only_where_it_is`, `test_gas_claim_with_proof_first_claim_of_the_channel`, `test_gas_claim_with_proof_steady`, `test_one_proof_claims_one_unit_and_a_position_counts_once` |
+| G2 | path direction ignored | 8: `test_a_check_that_cannot_run_is_unavailable_not_invalid`, `test_a_proven_request_at_its_signed_position_is_claimed_and_paid_out`, `test_an_invalid_proof_is_refused_and_the_position_stays_open`, `test_base_claimed_carries_earlier_batches`, `test_every_position_of_batches_of_one_to_nine_opens_only_where_it_is`, `test_gas_claim_with_proof_first_claim_of_the_channel`, `test_gas_claim_with_proof_steady`, `test_one_proof_claims_one_unit_and_a_position_counts_once` |
+| G3 | position range not checked | 1: `test_a_commitment_claimed_at_a_position_it_does_not_hold_is_refused` |
+| G4 | path length not checked | **none: survived, see below** |
+| G5 | root signature not checked | 3: `test_a_root_signed_for_another_gate_does_not_open_this_one`, `test_a_root_signed_for_one_channel_does_not_open_another`, `test_a_root_the_payer_did_not_sign_is_refused` |
+| G6 | root digest omits the channel | 9: `test_a_check_that_cannot_run_is_unavailable_not_invalid`, `test_a_commitment_claimed_at_a_position_it_does_not_hold_is_refused`, `test_a_proven_request_at_its_signed_position_is_claimed_and_paid_out`, `test_an_invalid_proof_is_refused_and_the_position_stays_open`, `test_base_claimed_carries_earlier_batches`, `test_gas_claim_with_proof_first_claim_of_the_channel`, `test_gas_claim_with_proof_steady`, `test_one_proof_claims_one_unit_and_a_position_counts_once`, `test_the_proof_must_be_for_the_included_commitment` |
+| G7 | root digest omits the price | 9: `test_a_check_that_cannot_run_is_unavailable_not_invalid`, `test_a_commitment_claimed_at_a_position_it_does_not_hold_is_refused`, `test_a_proven_request_at_its_signed_position_is_claimed_and_paid_out`, `test_an_invalid_proof_is_refused_and_the_position_stays_open`, `test_base_claimed_carries_earlier_batches`, `test_gas_claim_with_proof_first_claim_of_the_channel`, `test_gas_claim_with_proof_steady`, `test_one_proof_claims_one_unit_and_a_position_counts_once`, `test_the_proof_must_be_for_the_included_commitment` |
+| G8 | a position counts twice | 1: `test_one_proof_claims_one_unit_and_a_position_counts_once` |
+| G9 | ceiling from the batch size, not the proven count | 1: `test_one_proof_claims_one_unit_and_a_position_counts_once` |
+| G10 | baseClaimed ignored | 2: `test_base_claimed_carries_earlier_batches`, `test_gas_claim_with_proof_steady` |
+| G11 | could-not-check reported as invalid | 1: `test_a_check_that_cannot_run_is_unavailable_not_invalid` |
+| G12 | invalid proof accepted | 2: `test_an_invalid_proof_is_refused_and_the_position_stays_open`, `test_the_proof_must_be_for_the_included_commitment` |
+| G13 | receiver not required to be the gate | 1: `test_a_channel_whose_receiver_is_not_the_gate_is_refused` |
+| G14 | payout does not forward | 1: `test_a_proven_request_at_its_signed_position_is_claimed_and_paid_out` |
+| G15 | inclusion not checked | 1: `test_a_commitment_claimed_at_a_position_it_does_not_hold_is_refused` |
+| G16 | event without the output | 1: `test_a_proven_request_at_its_signed_position_is_claimed_and_paid_out` |
+| G17 | proof checked against the root instead of the commitment | 6: `test_a_proven_request_at_its_signed_position_is_claimed_and_paid_out`, `test_an_invalid_proof_is_refused_and_the_position_stays_open`, `test_base_claimed_carries_earlier_batches`, `test_gas_claim_with_proof_first_claim_of_the_channel`, `test_gas_claim_with_proof_steady`, `test_one_proof_claims_one_unit_and_a_position_counts_once` |
+| G18 | gate answers ERC-1271 for any signature | 1: `test_without_the_gate_nobody_claims_or_signs_for_its_channel` |
+
+### Fork suite (`test/ProofCapturePolicyGas.t.sol`, real USDC, `FORK_BLOCK=62638490`)
+
+| Id | Deliberate breakage | Tests that failed |
+|---|---|---|
+| FP1 | fork: capture one unit instead of the whole hold | 2: `test_fork_gas_capture_with_policy_steady`, `test_gas_capture_with_policy_steady` |
+| FP2 | fork: charge less than the maximum | 2: `test_fork_gas_charge_with_policy_steady`, `test_gas_charge_with_policy_steady` |
+| FP3 | fork: authorize does not forward to the escrow | 2 (the `setUp` of both gas suites, the fork suite's included) |
+
+### Escrow source (`lib/commerce-payments`, restored after the run)
+
+| Id | Deliberate breakage | Tests that failed |
+|---|---|---|
+| EX1 | escrow: capture does not check the operator (escrow source) | 1: `test_a_payment_for_another_operator_cannot_be_captured_here` |
+
+
+### Survivor
+
+- **G4** (the gate does not check the path's length). Equivalent as far as a test can tell: a path of the wrong length opens the root only if a leaf hash, the hash of 96 bytes, equals an inner node, the hash of 64, or the hash chain continues past the root to equal it, and either needs a keccak256 collision or preimage. The check stays as defence in depth; the proposal lists the tree encoding as an open point.
