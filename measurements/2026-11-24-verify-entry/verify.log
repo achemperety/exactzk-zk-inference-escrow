@@ -1,0 +1,84 @@
+MATCH    input settings.json: SHA-256 = provenance/  [dcae92a6d5fd8435b299b2df1f727a370fbdf9db9461e6d997c7bdd4b94ac6c4]
+MATCH    input srs.bin: SHA-256 = provenance/  [e4690b6479fceefdc2486372ceeaf274d7a336f908463caa619b7bc42ebfe9be]
+MATCH    input model.onnx: SHA-256 = provenance/  [c3caeb161859f91da3233830c3f43e5ed9f0c47cdc2913d1a48ffe42a3a51e90]
+MATCH    input model.onnx.data: SHA-256 = provenance/  [b96f93301048ea7af8eeaca094fee834111a4c1a3a639f17fb5f61b0b13a2612]
+MATCH    regenerated verifying key: SHA-256 = pinned vk.key  [32439290a76c2ef71fb6f20ef203b001b54d9835b411554bae827df5364e9523]
+MATCH    regenerated verifier source: SHA-256 = pinned  [5e9000bc433c2750068a876dce558deb97d8073c3368310bc58c9f9d9987784b]
+MATCH    chain id  [84532]
+MATCH    registry has code
+MATCH    entry is registered  [0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b]
+MATCH    entry() is the registered entry (keccak256 of its encoding = entryHash)  [0x7414dc57cfce12d3aa8914fd5577a62a0cb2181045a0d545d66895792c0e4190]
+MATCH    entry shape: lanes  [1 (circuit: 1)]
+MATCH    entry shape: outputSize  [320 (circuit: 320)]
+MATCH    adapter reports the EZKL proof system  [0xd64a7ed62eeeaf099a7ec8d83931e4d1aa99df94f1376645e0e42ad30e5ae1da]
+MATCH    verifier id = computeId(proof system, entry)  [0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b]
+MATCH    adapter's code hash = entry.adapterCodeHash  [0xbfc219d647efafebb7db189aa5b4f35703e4fbb226ff9ba9b9b907c56b1f84cf]
+MATCH    verifier's code hash = entry.targetCodeHash  [0x8cd0b80f6b67e187a9ee98478fdd1278b8e1b666d666d442920aaf911f485f49]
+MATCH    verifier is not a delegated account (EIP-7702)
+MATCH    keccak256(regenerated verifying key) = entry.vkHash  [0x13cff0426abe00c941934bdd6bb7757f2e703fb9f6862bf08a783eeca08b4ff2]
+MATCH    regenerated verifier = on-chain verifier, metadata trailer removed  [0xf60aad67ed7bf1b55cc6cb097b1997036617c161fbaa7f0fd80661c3bfc7b17c (17939 bytes) vs 0xf60aad67ed7bf1b55cc6cb097b1997036617c161fbaa7f0fd80661c3bfc7b17c (17939 bytes)]
+
+MATCH: solo (full), entry 0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b, block 63082345
+time {'key setup': 18.0, 'verifier source': 0.29, 'compile': 0.17, 'chain reads': 1.17, 'total': 21.68}, peak RSS of this process 996 MB
+MATCH    input settings.json: SHA-256 = provenance/  [a1d03ec48a1751397f55d6ad5888509146ba09f91764ccae5b09afd448402f4c]
+MATCH    input srs.bin: SHA-256 = provenance/  [d1a1655b4366a766d1578beb257849a92bf91cb1358c1a2c37ab180c5d3a204d]
+MATCH    input vk.key: SHA-256 = provenance/  [1ed847e127419bc1d7db2a22779f75284975bf1908b33a43486ca9070e4ef627]
+MATCH    regenerated verifier source: SHA-256 = pinned  [a843bcddb0aff97560139d92fd74c9bdfb0719e0a2fb8e17c92187e4e6da8636]
+MATCH    chain id  [84532]
+MATCH    registry has code
+MATCH    entry is registered  [0xff34bcad7f2abcb126327e61b648bae1d6a446ad3bd15924ec2218c742d51107]
+MATCH    entry() is the registered entry (keccak256 of its encoding = entryHash)  [0x5d86dad28fc553149c2d5b8164c2e0e6628894722eeee0322d2194eefb8d3126]
+MATCH    entry shape: lanes  [8 (circuit: 8)]
+MATCH    entry shape: outputSize  [320 (circuit: 320)]
+MATCH    adapter reports the EZKL proof system  [0xd64a7ed62eeeaf099a7ec8d83931e4d1aa99df94f1376645e0e42ad30e5ae1da]
+MATCH    verifier id = computeId(proof system, entry)  [0xff34bcad7f2abcb126327e61b648bae1d6a446ad3bd15924ec2218c742d51107]
+MATCH    adapter's code hash = entry.adapterCodeHash  [0xbfc219d647efafebb7db189aa5b4f35703e4fbb226ff9ba9b9b907c56b1f84cf]
+MATCH    verifier's code hash = entry.targetCodeHash  [0x471c8109f1a03375b17ae6afd421f5857346edf92bf37fce1c7b90a3e02d7ef1]
+MATCH    verifier is not a delegated account (EIP-7702)
+MATCH    keccak256(regenerated verifying key) = entry.vkHash  [0xdd03fb0c69e96cc02cbcc6bed8ef51665f934c01cddaf2a855bd1c7fce94675f]
+MATCH    regenerated verifier = on-chain verifier, metadata trailer removed  [0xd0cab4041caaf77ea95fe45a29d14950be503ce26eb982af11026634112d8c67 (17937 bytes) vs 0xd0cab4041caaf77ea95fe45a29d14950be503ce26eb982af11026634112d8c67 (17937 bytes)]
+
+MATCH: k8 (from-vk), entry 0xff34bcad7f2abcb126327e61b648bae1d6a446ad3bd15924ec2218c742d51107, block 63082370
+time {'verifier source': 1.34, 'compile': 0.17, 'chain reads': 1.1, 'total': 8.14}, peak RSS of this process 742 MB
+MATCH    input settings.json: SHA-256 = provenance/  [dcae92a6d5fd8435b299b2df1f727a370fbdf9db9461e6d997c7bdd4b94ac6c4]
+MATCH    input srs.bin: SHA-256 = provenance/  [e4690b6479fceefdc2486372ceeaf274d7a336f908463caa619b7bc42ebfe9be]
+MATCH    input vk.key: SHA-256 = provenance/  [32439290a76c2ef71fb6f20ef203b001b54d9835b411554bae827df5364e9523]
+MATCH    regenerated verifier source: SHA-256 = pinned  [5e9000bc433c2750068a876dce558deb97d8073c3368310bc58c9f9d9987784b]
+MATCH    chain id  [84532]
+MATCH    registry has code
+MATCH    entry is registered  [0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b]
+MATCH    entry() is the registered entry (keccak256 of its encoding = entryHash)  [0x7414dc57cfce12d3aa8914fd5577a62a0cb2181045a0d545d66895792c0e4190]
+MATCH    entry shape: lanes  [1 (circuit: 1)]
+MATCH    entry shape: outputSize  [320 (circuit: 320)]
+MATCH    adapter reports the EZKL proof system  [0xd64a7ed62eeeaf099a7ec8d83931e4d1aa99df94f1376645e0e42ad30e5ae1da]
+MATCH    verifier id = computeId(proof system, entry)  [0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b]
+MATCH    adapter's code hash = entry.adapterCodeHash  [0xbfc219d647efafebb7db189aa5b4f35703e4fbb226ff9ba9b9b907c56b1f84cf]
+MATCH    verifier's code hash = entry.targetCodeHash  [0x8cd0b80f6b67e187a9ee98478fdd1278b8e1b666d666d442920aaf911f485f49]
+MATCH    verifier is not a delegated account (EIP-7702)
+MATCH    keccak256(regenerated verifying key) = entry.vkHash  [0x13cff0426abe00c941934bdd6bb7757f2e703fb9f6862bf08a783eeca08b4ff2]
+MATCH    regenerated verifier = on-chain verifier, metadata trailer removed  [0xf60aad67ed7bf1b55cc6cb097b1997036617c161fbaa7f0fd80661c3bfc7b17c (17939 bytes) vs 0xf60aad67ed7bf1b55cc6cb097b1997036617c161fbaa7f0fd80661c3bfc7b17c (17939 bytes)]
+
+MATCH: solo (from-vk), entry 0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b, block 63082406
+time {'verifier source': 0.33, 'compile': 0.18, 'chain reads': 1.25, 'total': 3.56}, peak RSS of this process 125 MB
+MISMATCH input settings.json: SHA-256 = provenance/  [086eb718535582f7a7102ae95bad480d16f21708f9dd64d299864718f8c43c1c]
+MATCH    input srs.bin: SHA-256 = provenance/  [e4690b6479fceefdc2486372ceeaf274d7a336f908463caa619b7bc42ebfe9be]
+MATCH    input model.onnx: SHA-256 = provenance/  [c3caeb161859f91da3233830c3f43e5ed9f0c47cdc2913d1a48ffe42a3a51e90]
+MATCH    input model.onnx.data: SHA-256 = provenance/  [b96f93301048ea7af8eeaca094fee834111a4c1a3a639f17fb5f61b0b13a2612]
+MISMATCH regenerated verifying key: SHA-256 = pinned vk.key  [c42837ffafe2174fed53586db813520426c4b46582a6ef9b7f7ccf35bc2005d2]
+MISMATCH regenerated verifier source: SHA-256 = pinned  [c12941bd560d8fed9b25a71242139c18d19ae41dc5ab57ecb925b0c3558ae197]
+MATCH    chain id  [84532]
+MATCH    registry has code
+MATCH    entry is registered  [0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b]
+MATCH    entry() is the registered entry (keccak256 of its encoding = entryHash)  [0x7414dc57cfce12d3aa8914fd5577a62a0cb2181045a0d545d66895792c0e4190]
+MATCH    entry shape: lanes  [1 (circuit: 1)]
+MATCH    entry shape: outputSize  [320 (circuit: 320)]
+MATCH    adapter reports the EZKL proof system  [0xd64a7ed62eeeaf099a7ec8d83931e4d1aa99df94f1376645e0e42ad30e5ae1da]
+MATCH    verifier id = computeId(proof system, entry)  [0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b]
+MATCH    adapter's code hash = entry.adapterCodeHash  [0xbfc219d647efafebb7db189aa5b4f35703e4fbb226ff9ba9b9b907c56b1f84cf]
+MATCH    verifier's code hash = entry.targetCodeHash  [0x8cd0b80f6b67e187a9ee98478fdd1278b8e1b666d666d442920aaf911f485f49]
+MATCH    verifier is not a delegated account (EIP-7702)
+MISMATCH keccak256(regenerated verifying key) = entry.vkHash  [0x46b51e376a9156715635ec2f4ac5f6d6cd3699dcf910ae1012534c80bdbada68]
+MISMATCH regenerated verifier = on-chain verifier, metadata trailer removed  [0xc876948563dd1d921da114f0ff30e8e2cee7b420e8b48f96e1fe57db6270afbe (17939 bytes) vs 0xf60aad67ed7bf1b55cc6cb097b1997036617c161fbaa7f0fd80661c3bfc7b17c (17939 bytes)]
+
+MISMATCH: solo (full), entry 0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b, block 63082513
+time {'key setup': 17.51, 'verifier source': 0.32, 'compile': 0.21, 'chain reads': 1.13, 'total': 21.12}, peak RSS of this process 1012 MB

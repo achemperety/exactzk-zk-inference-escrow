@@ -1,0 +1,115 @@
+{
+  "experiment": "warm prover",
+  "machine": "Intel(R) Xeon(R) Gold 5220R CPU @ 2.20GHz, 2 vCPUs, Linux",
+  "steps": [
+    {
+      "step": "compile_circuit",
+      "seconds": 0.03,
+      "rss_mb": 36,
+      "peak_rss_mb": 40
+    },
+    {
+      "step": "setup",
+      "seconds": 18.25,
+      "rss_mb": 222,
+      "peak_rss_mb": 960
+    },
+    {
+      "step": "gen_witness published",
+      "seconds": 0.23,
+      "rss_mb": 222,
+      "peak_rss_mb": 960
+    },
+    {
+      "step": "prove published (cold)",
+      "seconds": 20.1,
+      "rss_mb": 1047,
+      "peak_rss_mb": 1393
+    },
+    {
+      "step": "gen_witness fresh-0",
+      "seconds": 0.29,
+      "rss_mb": 583,
+      "peak_rss_mb": 1393
+    },
+    {
+      "step": "prove fresh-0 (warm)",
+      "seconds": 19.96,
+      "rss_mb": 967,
+      "peak_rss_mb": 1409
+    },
+    {
+      "step": "gen_witness fresh-1",
+      "seconds": 0.28,
+      "rss_mb": 615,
+      "peak_rss_mb": 1409
+    },
+    {
+      "step": "prove fresh-1 (warm)",
+      "seconds": 20.11,
+      "rss_mb": 1091,
+      "peak_rss_mb": 1409
+    },
+    {
+      "step": "gen_witness fresh-2",
+      "seconds": 0.29,
+      "rss_mb": 740,
+      "peak_rss_mb": 1409
+    },
+    {
+      "step": "prove fresh-2 (warm)",
+      "seconds": 20.1,
+      "rss_mb": 1033,
+      "peak_rss_mb": 1409
+    },
+    {
+      "step": "gen_witness fresh-3",
+      "seconds": 0.24,
+      "rss_mb": 756,
+      "peak_rss_mb": 1409
+    },
+    {
+      "step": "prove fresh-3 (warm)",
+      "seconds": 20.42,
+      "rss_mb": 1134,
+      "peak_rss_mb": 1409
+    },
+    {
+      "step": "gen_witness fresh-4",
+      "seconds": 0.26,
+      "rss_mb": 1018,
+      "peak_rss_mb": 1409
+    },
+    {
+      "step": "prove fresh-4 (warm)",
+      "seconds": 19.9,
+      "rss_mb": 1247,
+      "peak_rss_mb": 1409
+    }
+  ],
+  "vk_sha256": "32439290a76c2ef71fb6f20ef203b001b54d9835b411554bae827df5364e9523",
+  "vk_equals_pinned": true,
+  "vk_bytes": 157511,
+  "pk_bytes": 658663971,
+  "verified": [
+    {
+      "published": true
+    },
+    {
+      "fresh-0": true
+    },
+    {
+      "fresh-1": true
+    },
+    {
+      "fresh-2": true
+    },
+    {
+      "fresh-3": true
+    },
+    {
+      "fresh-4": true
+    }
+  ],
+  "published_proof_instances_equal_stored": true
+}

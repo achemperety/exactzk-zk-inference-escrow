@@ -1,0 +1,55 @@
+# Foundry
+out/
+cache/
+broadcast/
+
+# Secrets and local configuration. Nothing in this repository needs a key on disk.
+.env
+.env.*
+!.env.example
+*.pem
+keystore/
+keystores/
+
+# EZKL artifacts that are large or cheap to regenerate
+**/pk.key
+**/*.pf
+**/*.ezkl
+**/witness*.json
+**/model.compiled
+
+# The structured reference strings are published elsewhere and fetched on demand:
+# scripts/fetch_srs.sh downloads them and checks provenance/SRS.sha256.
+circuits/spike-mlp/*/srs.bin
+
+# Verifying keys are ignored by default and tracked only for the two pinned
+# circuits listed in circuits/spike-mlp/MANIFEST.md.
+**/vk.key
+!circuits/spike-mlp/run_t3_k5_nonces/vk.key
+!circuits/spike-mlp/run_mnist_mw_k8/vk.key
+
+# Rust
+/target
+**/*.rs.bk
+
+# Node / TypeScript
+node_modules/
+dist/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# x402's sources, fetched at a pinned commit by x402/fetch_x402.sh; local end-to-end chain state
+x402/vendor/
+x402/.state/
+
+# Quickstart: the throwaway testnet key it creates
+.quickstart/

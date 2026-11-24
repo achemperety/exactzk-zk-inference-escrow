@@ -1,0 +1,8 @@
+{"stage": "compile_setup", "ezkl_version": "23.0.5", "t_compile_s": 0.0115, "t_setup_s": 1.9571, "t_total_s": 1.9686, "vk_bytes": 157511, "pk_bytes": 658663971, "compiled_bytes": 1713333, "internal_peak_rss_bytes": 1560379392, "circuit": "solo", "external_time_l_peak_rss_bytes": 1560379392}
+{"stage": "witness", "ezkl_version": "23.0.5", "t_witness_s": 0.1073, "witness_bytes": 123190, "internal_peak_rss_bytes": 60899328, "circuit": "solo", "external_time_l_peak_rss_bytes": 60981248}
+{"stage": "prove", "ezkl_version": "23.0.5", "t_prove_s": 2.629, "proof_bytes": 23192, "internal_peak_rss_bytes": 1778614272, "circuit": "solo", "external_time_l_peak_rss_bytes": 1778614272}
+{"stage": "verify", "ezkl_version": "23.0.5", "t_verify_s": 0.0184, "verify_ok": true, "internal_peak_rss_bytes": 123273216, "circuit": "solo", "external_time_l_peak_rss_bytes": 123355136}
+{"stage": "compile_setup", "ezkl_version": "23.0.5", "t_compile_s": 0.0089, "t_setup_s": 15.1024, "t_total_s": 15.1113, "vk_bytes": 1247047, "pk_bytes": 5269293603, "compiled_bytes": 1903775, "internal_peak_rss_bytes": 6347259904, "circuit": "batch", "external_time_l_peak_rss_bytes": 6347259904}
+{"stage": "witness", "ezkl_version": "23.0.5", "t_witness_s": 0.8162, "witness_bytes": 982771, "internal_peak_rss_bytes": 96927744, "circuit": "batch", "external_time_l_peak_rss_bytes": 97009664}
+{"stage": "prove", "ezkl_version": "23.0.5", "t_prove_s": 19.0575, "proof_bytes": 34948, "internal_peak_rss_bytes": 12834701312, "circuit": "batch", "external_time_l_peak_rss_bytes": 12834701312}
+{"stage": "verify", "ezkl_version": "23.0.5", "t_verify_s": 0.1473, "verify_ok": true, "internal_peak_rss_bytes": 810532864, "circuit": "batch", "external_time_l_peak_rss_bytes": 810614784}

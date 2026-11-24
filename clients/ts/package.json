@@ -1,0 +1,29 @@
+{
+  "name": "@exactzk/x402-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Client for paying proof-gated inference on this repository's Base Sepolia deployment: x402 v2 (proof-gated and auth-capture) and direct settlement with a published proof",
+  "type": "module",
+  "license": "MIT",
+  "main": "src/index.ts",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "test": "node --import tsx --test test/refusal.test.ts",
+    "quickstart": "tsx bin/quickstart.ts",
+    "check-commitment": "tsx bin/check-commitment.ts"
+  },
+  "dependencies": {
+    "tsx": "4.21.0",
+    "viem": "2.48.11"
+  },
+  "optionalDependencies": {
+    "@ezkljs/engine": "22.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.17",
+    "typescript": "5.9.2"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "compile_seconds": 1.361974766,
+  "constraints": 158795,
+  "cores": 8,
+  "gomaxprocs": 2,
+  "internal_variables": 158582,
+  "label": "EXPERIMENTAL; single-party local trusted setup, insecure for anything but measurement",
+  "peak_rss_mb": 392,
+  "public_inputs": 11,
+  "secret_inputs": 789,
+  "semantics": "bias at 2^13 after rescale, round half away",
+  "setup_seconds": 36.978407103
+}

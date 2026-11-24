@@ -1,0 +1,25 @@
+{
+  "network": "Base Sepolia",
+  "chainId": 84532,
+  "commit": "07d7e1ceb3101fa61d8fc2ded5c6423d5c01ddc6",
+  "blocks": [
+    62968700,
+    62968830
+  ],
+  "date": "2026-11-24",
+  "contracts": {
+    "VerifierRegistry": "0xc754b4d635a1f4C67Bb09156aE078f648ae06cF1",
+    "Halo2EzklAdapter": "0x070d8A6485ea5a813E949FeB57BCE9b2d35a64a5",
+    "soloVerifier": "0x86e3aED8A2c3f12b5CF87CD473212483c7229632",
+    "k8Verifier": "0x6430e833F537Ddd1cF476E976EC9e7e0ef7238e1",
+    "SoloSettlement": "0x0934cC0B3Fef6d8f9F8f87f40aFCfF59f668c729",
+    "ChannelSettlement": "0x93e8E5745dB6eAb0eAC16FF2Dbfdd78A0C55c56B",
+    "ProofEvaluator8183": "0x92B1Ff082EaDCda56eE82408695429820687de39",
+    "ProofValidator8004": "0x493EC45c1bE94152D73757f489a4467E7DCf882A",
+    "AuthCaptureProofOperator": "0x039e3fFd1778bb91be2961b09999FDf58EcF68Ab"
+  },
+  "verifierIds": {
+    "solo": "0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b",
+    "k8": "0xff34bcad7f2abcb126327e61b648bae1d6a446ad3bd15924ec2218c742d51107"
+  }
+}

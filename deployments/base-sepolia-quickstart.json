@@ -1,0 +1,5 @@
+{
+  "payee": "0xc698A4ef98a8B1c419168E97470Aa4f645C418Fc",
+  "price": "10000",
+  "note": "Testnet-only account that receives the quickstart's payments (0.01 USDC each); it has no other role."
+}

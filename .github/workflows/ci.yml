@@ -1,0 +1,67 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # Top-level submodules, then only the nested ones the build reads. A recursive checkout would
+      # also clone the smart-wallet and account-abstraction trees under commerce-payments, which
+      # nothing here compiles.
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Nested submodules used by the build
+        run: |
+          git -C lib/openzeppelin-contracts-upgradeable submodule update --init lib/openzeppelin-contracts
+          git -C lib/commerce-payments submodule update --init lib/solady lib/spend-permissions
+          git -C lib/commerce-payments/lib/spend-permissions submodule update --init lib/openzeppelin-contracts
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+
+      - name: Versions
+        run: forge --version
+
+      - name: Format
+        run: forge fmt --check
+
+      - name: Build
+        run: forge build --sizes
+
+      - name: Test
+        run: forge test -vvv
+
+      - name: Hygiene scan
+        run: bash scripts/hygiene_scan.sh
+
+      - name: Hygiene scan self-test
+        run: bash scripts/hygiene_selftest.sh
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # The client's checks before it signs; its end-to-end run against the middleware needs a local
+      # node and a Python environment (clients/e2e/run.sh) and runs locally.
+      - name: Client package (TypeScript)
+        working-directory: clients/ts
+        run: |
+          npm ci --no-audit --no-fund --omit=optional
+          npm run typecheck
+          npm test
+
+      - name: Middleware (Python, compiles)
+        run: python3 -m py_compile clients/python/exactzk_x402/*.py clients/e2e/server.py
+
+      # The entry check's comparison, against the pinned files; no EZKL, no network.
+      - name: Registry entry check (unit tests)
+        run: python3 scripts/test_verify_entry.py

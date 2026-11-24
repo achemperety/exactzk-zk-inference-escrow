@@ -1,0 +1,70 @@
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+libs = ["lib"]
+# OpenZeppelin is pinned to the v5.7.0 release commit by the submodule; the contracts in
+# src/ use its signature helpers and SafeERC20.
+#
+# Third-party reference contracts, used only by tests (test/external/README.md): the ERC-8004
+# registries (lib/erc-8004-contracts) and the ERC-8183 job contract (test/external/erc8183).
+# They are built against OpenZeppelin v5.4.0, the version the ERC-8004 repository's lockfile
+# pins: contracts-upgradeable v5.4.0 and the contracts release its own submodule pins. The
+# context remappings below give that code, and only that code, the v5.4.0 files. They must come
+# first: Forge takes the first remapping that matches an import, not the most specific one.
+#
+# x402's auth-capture escrow (lib/commerce-payments, base/commerce-payments v1.1.0), also used only
+# by tests, is built with its own dependencies as its remappings.txt names them: OpenZeppelin v5.0.2
+# (through its spend-permissions submodule) and solady.
+remappings = [
+    "lib/openzeppelin-contracts-upgradeable/:@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
+    "lib/erc-8004-contracts/:@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
+    "test/external/:@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
+    "lib/commerce-payments/:@openzeppelin/contracts/=lib/commerce-payments/lib/spend-permissions/lib/openzeppelin-contracts/contracts/",
+    "lib/commerce-payments/:solady/=lib/commerce-payments/lib/solady/src/",
+    "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "forge-std/=lib/forge-std/src/",
+]
+
+# The compiler is pinned and metadata is switched off on purpose: the runtime
+# code hash of an adapter is part of every verifier id, so the bytecode must not
+# depend on file paths, comments or the compiler release that happens to be
+# installed.
+solc = "0.8.28"
+# Tests run under the Osaka rules because that is how the target testnet prices
+# the modexp precompile (three calls per proof; checked against Base Sepolia on
+# 2026-11-22). solc 0.8.28 has no osaka target, so Foundry hands it "prague";
+# the contracts use no opcode newer than Cancun.
+evm_version = "osaka"
+optimizer = true
+# Optimise for running cost, not code size. Below roughly 10,000 runs the compiler
+# stops writing 32-byte constants out in full and loads them through slower code
+# instead; that alone cost the EZKL adapter 2,600 gas per K=8 verification.
+optimizer_runs = 1_000_000
+via_ir = true
+bytecode_hash = "none"
+cbor_metadata = false
+
+# Tests read the pinned verifier bytecode from test/fixtures/. The x402 local-chain script
+# (script/X402LocalChain.s.sol) writes the chain state for the end-to-end run to x402/.state/.
+fs_permissions = [{ access = "read", path = "test/fixtures/" }, { access = "read-write", path = "x402/.state/" }]
+
+[fuzz]
+runs = 512
+
+# The channel invariants (test/ChannelInvariant.t.sol): 512 random sequences of 50 calls each. A
+# call that reverts is part of the exercise, not a failure; the per-function call and revert
+# counts are printed with the result.
+[invariant]
+runs = 512
+depth = 50
+fail_on_revert = false
+show_metrics = true
+
+[fmt]
+line_length = 120
+# Pinned fixtures and the Groth16 prototype's exported verifier are generated files, and the ERC-8183
+# reference contract is copied from the ERC's text; all must stay byte-identical.
+ignore = ["test/fixtures/*", "test/external/erc8183/*", "test/experimental/groth16/Groth16Verifier.sol"]

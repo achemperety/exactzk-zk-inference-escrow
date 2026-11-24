@@ -1,0 +1,40 @@
+{
+  "experiment": "check_mode SAFE",
+  "machine": "Intel(R) Xeon(R) Gold 5220R CPU @ 2.20GHz, 2 vCPUs, Linux",
+  "steps": [
+    {
+      "step": "compile_circuit",
+      "seconds": 0.03,
+      "rss_mb": 37,
+      "peak_rss_mb": 42
+    },
+    {
+      "step": "setup",
+      "seconds": 18.95,
+      "rss_mb": 268,
+      "peak_rss_mb": 947
+    },
+    {
+      "step": "gen_witness published",
+      "seconds": 0.22,
+      "rss_mb": 269,
+      "peak_rss_mb": 947
+    },
+    {
+      "step": "prove published (cold)",
+      "seconds": 20.41,
+      "rss_mb": 1039,
+      "peak_rss_mb": 1398
+    }
+  ],
+  "vk_sha256": "32439290a76c2ef71fb6f20ef203b001b54d9835b411554bae827df5364e9523",
+  "vk_equals_pinned": true,
+  "vk_bytes": 157511,
+  "pk_bytes": 658663971,
+  "verified": [
+    {
+      "published": true
+    }
+  ],
+  "published_proof_instances_equal_stored": true
+}

@@ -1,0 +1,40 @@
+{
+  "transactions": [
+    {
+      "scenario": "cold_seq1",
+      "tx_hash": "4c246b9faa9e1e55fa1e98a9bca16c948d6ee02ed3f1953293fc8b9f5814beec",
+      "gasUsed_script": 1833193,
+      "status": 1,
+      "gasUsed_cast": 1833193,
+      "match": true
+    },
+    {
+      "scenario": "steady_seq2",
+      "tx_hash": "bbe27ee31e61f393ccecc79a83b8d84f45ece65f6b4640882dcafcfaa68d8540",
+      "gasUsed_script": 1542409,
+      "status": 1,
+      "gasUsed_cast": 1542409,
+      "match": true
+    },
+    {
+      "scenario": "steady_seq3_sanity",
+      "tx_hash": "75a41ef8d85ce5edb2fb5652b120a86e49a6516faaa9a18d2fa78e0cd3f5dd2f",
+      "gasUsed_script": 1542481,
+      "status": 1,
+      "gasUsed_cast": 1542481,
+      "match": true
+    }
+  ],
+  "K": 16,
+  "vk_batch_addr": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+  "verify_precheck_eth_call": true,
+  "derive": {
+    "cold_gas": 1833193,
+    "steady_gas": 1542409,
+    "steady_sanity_gas": 1542481,
+    "steady_per_request": 96400.5625,
+    "cold_per_request": 114574.5625,
+    "cold_minus_steady": 290784,
+    "expected_diff_formula": 290676
+  }
+}

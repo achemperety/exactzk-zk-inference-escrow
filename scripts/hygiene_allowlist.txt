@@ -1,0 +1,159 @@
+# Allow-list for scripts/hygiene_scan.sh.
+#
+# Only three kinds of constant belong here: the published defaults of the Anvil
+# development node; published protocol constants or content hashes of files in
+# this repository; and hashes of this repository's own testnet transactions, each
+# read back from the chain. A deployed address never belongs here; it goes in deployments/.
+#
+#   addr <0x + 40 hex>             allowed anywhere
+#   hash <64 hex, 0x optional>     allowed anywhere
+#   kw   <keyword> <path glob>     keyword allowed in matching paths
+#
+# Every entry carries its reason after '#'.
+
+# ── Protocol constants ──────────────────────────────────────────────────────
+addr 0x0000000000000000000000000000000000000000  # zero address
+addr 0x420000000000000000000000000000000000000f  # OP-stack GasPriceOracle predeploy, same on every OP-stack chain
+addr 0x036cbd53842c5426634e7929541ec2318f3dcf7e  # Circle's USDC on Base Sepolia, published by Circle; used by the opt-in fork test
+hash 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47  # BN254 base field modulus (in gnark's exported Groth16 verifier)
+hash 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd45  # BN254 base field modulus minus 2, its inverse exponent (the same)
+hash 0x183227397098d014dc2822db40c0ac2ecbc0b548b438e5469e10460b6c3e7ea4  # 1/2 in the BN254 base field (gnark's exported Groth16 verifier, point decompression)
+hash 0x2b149d40ceb8aaae81be18991be06ac3b5b4c5e559dbefa33267e6dc24a138e5  # 27/82 in the BN254 base field (the same)
+hash 0x2fcd3ac2a640a154eb23960892a85a68f031ca0c8344b23a577dcf1052b9e775  # 3/82 in the BN254 base field (the same)
+hash 0x7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0  # secp256k1 group order / 2, the EIP-2 upper bound for an ECDSA s value
+hash 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001  # BN254 scalar field modulus
+hash 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc  # ERC-1967 implementation slot, keccak256("eip1967.proxy.implementation") - 1
+addr 0xf96815976523e00e65be8f34ca5e64b4f41eb19c  # x402 auth-capture: canonical AuthCaptureEscrow, commerce-payments v1.1 (published in the scheme's EVM binding)
+addr 0x8612dfdc421f80336cd14e8ef9cb1e765db5ab88  # x402 auth-capture: canonical ERC-3009 token collector, commerce-payments v1.1 (same source)
+addr 0xca11bde05977b3631167028862be2a173976ca11  # Multicall3, deployed at this address on every EVM chain
+addr 0x8004cb1bf31daf7788923b405b754f57aceb4272  # ERC-8004 authors' testnet Validation Registry proxy (TESTNET_ADDRESSES in lib/erc-8004-contracts/scripts/addresses.ts)
+addr 0x8004a818bfb912233c491871b3d84c89a494bd9e  # ERC-8004 authors' testnet Identity Registry proxy (same source)
+addr 0xdb31f5d9167f8ebc8b30fbbf814c4d297c2d7f99  # implementation behind that Validation Registry proxy on Base Sepolia, read from its ERC-1967 slot and compared with the source (scripts/erc8004_live_check.py)
+addr 0x7274e874ca62410a93bd8bf61c69d8045e399c02  # implementation behind that Identity Registry proxy, the same way
+
+# ── Anvil development node: published default accounts and keys ─────────────
+# Derived from the well-known test mnemonic. They hold nothing on any real network.
+addr 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266  # Anvil default account 0
+addr 0x70997970c51812dc3a010c7d01b50e0d17dc79c8  # Anvil default account 1
+addr 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc  # Anvil default account 2
+addr 0x90f79bf6eb2c4f870365e785982e1f101e93b906  # Anvil default account 3
+addr 0x15d34aaf54267db7d7c367839aaf71a00a2c6a65  # Anvil default account 4
+addr 0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc  # Anvil default account 5
+addr 0x976ea74026e726554db657fa54763abd0c3a0aa9  # Anvil default account 6
+addr 0x14dc79964da2c08b23698b3d3cc7ca32193d9955  # Anvil default account 7
+addr 0x23618e81e3f5cdf7f54c3d65f7fbc0abf5b21e8f  # Anvil default account 8
+addr 0xa0ee7a142d267c1f36714e4a8f75612f20a79720  # Anvil default account 9
+hash 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80  # Anvil default private key 0 (public test key)
+hash 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d  # Anvil default private key 1 (public test key)
+hash 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a  # Anvil default private key 2 (public test key)
+hash 0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6  # Anvil default private key 3 (public test key)
+hash 0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a  # Anvil default private key 4 (public test key)
+hash 0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba  # Anvil default private key 5 (public test key)
+hash 0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e  # Anvil default private key 6 (public test key)
+hash 0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356  # Anvil default private key 7 (public test key)
+hash 0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97  # Anvil default private key 8 (public test key)
+hash 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6  # Anvil default private key 9 (public test key)
+addr 0x5fbdb2315678afecb367f032d93f642f64180aa3  # first contract created by Anvil default account 0 on a fresh local node
+
+# ── Content hashes of pinned files (circuits/spike-mlp/MANIFEST.md) ─────────
+hash 0x13cff0426abe00c941934bdd6bb7757f2e703fb9f6862bf08a783eeca08b4ff2  # keccak256 of the solo circuit's vk.key
+hash 0xdd03fb0c69e96cc02cbcc6bed8ef51665f934c01cddaf2a855bd1c7fce94675f  # keccak256 of the K=8 circuit's vk.key
+hash 0x8cd0b80f6b67e187a9ee98478fdd1278b8e1b666d666d442920aaf911f485f49  # keccak256 of the solo verifier runtime bytecode as pinned
+hash 0x471c8109f1a03375b17ae6afd421f5857346edf92bf37fce1c7b90a3e02d7ef1  # keccak256 of the K=8 verifier runtime bytecode as pinned
+hash 0xf60aad67ed7bf1b55cc6cb097b1997036617c161fbaa7f0fd80661c3bfc7b17c  # keccak256 of the solo verifier runtime bytecode, metadata stripped
+hash 0xd0cab4041caaf77ea95fe45a29d14950be503ce26eb982af11026634112d8c67  # keccak256 of the K=8 verifier runtime bytecode, metadata stripped
+hash 0x17b5d583d79a439abefcbd71cb12658ab13966db89e9b1fc8839efccabf0d92c  # keccak256 of the stored solo proof
+hash 0xcd9916b6f9155895dba7b9333344331309ea76b69c27b233fd3dab440e404cfe  # keccak256 of the stored K=8 proof
+
+# ── Content hashes of third-party reference files (test/external/README.md) ──
+hash 257c35bbaecab58d0c36823fe8fb2d0fffc83d6f1fd7301d97674707784efa3a  # SHA-256 of ERCS/erc-8183.md at ethereum/ERCs a078cab
+hash 00103fb36b2b75118713c60142584e6411b85c721103eb00654aa3421d9305da  # SHA-256 of test/external/erc8183/IACPHook.sol, copied from that ERC
+hash 4f48f573cf5e05c70170b53a3cb95755e76ce40c8f1f8d3d339b95c289e5e8d8  # SHA-256 of test/external/erc8183/AgenticCommerce.sol, copied from that ERC
+hash 18c8ca8c88493b46e54d000c96eaf7470d1f9dbfe55493fd7fa923bae543ff75  # SHA-256 of IdentityRegistryUpgradeable.sol at erc-8004-contracts b9e466c
+hash 26b1ebb8718abfeba1f12d51201f2adcf6c02f5bde79902532bd2d8fc3657882  # SHA-256 of ValidationRegistryUpgradeable.sol at erc-8004-contracts b9e466c
+hash 9d3b152b88733e61f40ae2de775f7448001b73d9165f23ee8bbe5dd88cd042aa  # SHA-256 of HardhatMinimalUUPS.sol at erc-8004-contracts b9e466c
+hash 249dc3d96ad7bbe4afd25cacd14be942eb87751abcf1608bab19a610f3c3f8a9  # SHA-256 of the ERC-8004 text (ERC8004SPEC.md at b9e466c, ERCS/erc-8004.md at ethereum/ERCs 503591a)
+hash 0x45a621c9257c0acda6d061e2c58ef8a97aec95bff2102b370a5ba2ace5ccbe23  # keccak256 of ValidationRegistryUpgradeable's runtime at b9e466c, metadata removed and immutables zeroed (scripts/erc8004_live_check.py)
+hash 0x6a035e2721ffdb11e98c8bd1d82404292499be4a06efdb455ab9a3d942b3e6b0  # the same for IdentityRegistryUpgradeable
+hash 0x33558f6cb34733174fdd6ec5ca8257834a8e4302abc08a4542f73ddf07d8702a  # code hash of x402's canonical escrow on Base Sepolia (scripts/escrow_live_check.py)
+hash 0xe27322c83d2cb91d01f59fc5c86512f4ecb5e9f300ed17120d78c55fbc5fb62f  # code hash of x402's canonical ERC-3009 collector on Base Sepolia (same script)
+hash 0x959d6549d573960aea743edea6287960b322139b8df48ced18256637f3c420be  # keccak256 of AuthCaptureEscrow's runtime at commerce-payments v1.1.0, metadata removed and immutables zeroed (same script)
+hash 0x70e974cd4484f8c452c21caf8f61a2385696aff32fc3a1f923f539a1e0b0b8f8  # the same for ERC3009PaymentCollector
+
+# ── Verifier ids (content hashes of the registered entries, docs/deployment-notes.md) ──
+hash 0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b  # VerifierRegistry id of the solo entry
+hash 0xff34bcad7f2abcb126327e61b648bae1d6a446ad3bd15924ec2218c742d51107  # VerifierRegistry id of the K=8 entry
+hash 0x2b8e2b3726c48d66da7275424b8db3a590c21ff19d52e3783e3e051ea3600460  # EXPERIMENTAL Groth16 prototype: Poseidon2 commitment of the published solo input (measurements/experimental/groth16)
+hash 0xddb7fff5097d85fa757f4e918297f832e3a24280444f6818ded34ba01fb855d6  # EXPERIMENTAL Groth16 prototype: keccak256 of its verifying-key file (the same)
+hash 0xa3490d874b6e2fee46b3d20d3355d71980e8fed85b8860c6cabffc2d46d63518  # keccak256 of the K=16 circuit's vk.key (measurements/2026-11-24-k16)
+hash 533045deb1e157d0aa516dbe6e7b45f845f8f4b957edc06b6c090902a832bcc0  # SHA-256 of the K=16 circuit's vk.key (measurements/2026-11-24-k16)
+hash e29fb79f53fba2739863faa34229dbc189e8618c09c0734e763bccbb95d6272a  # SHA-256 of the K=16 circuit's settings.json (the same)
+hash 5dc7f0dcba82e5498e7a5af5d9afbcd0f39b3a906e0f86c140d602cf6b9554b7  # SHA-256 of the K=16 circuit's stored proof.json (the same)
+hash 225dc2135dde265e6c8951708b05d75b6dd4230e0e723d39b4e665dc43d1de3a  # SHA-256 of the K=16 verifier source, regenerated from its key (the same)
+hash 0x001134b26d48de44e659b2a43fa16d5aaa1ffe3b43a2035f6d639448b4dfff70  # input commitment of the stored solo proof, its first public instance (clients/ts/published/solo-proof.json)
+hash 0x12fa84466c360ddec49cbccd545fbda997e8d3c4e2b8a3b20fece0e5d0b302c5  # input commitment of lane 0 of the stored K=8 proof, a public instance (clients/ts/published/k8-proof.json)
+hash 0x3036c6c4b42c6fd18ae650a804a63a361b119e49613735afed498d518935e967  # input commitment of lane 1 of the stored K=8 proof, a public instance (clients/ts/published/k8-proof.json)
+hash 0x1c7fb037d32e09df31a7315496e4bcdb6a9fc789c1a649aeec7ccfbfa3b2a653  # input commitment of lane 2 of the stored K=8 proof, a public instance (clients/ts/published/k8-proof.json)
+hash 0x249923d31bc7458ccd2dfcad622ce65a7b7d81ccf9e391db2fea1313b12ae80e  # input commitment of lane 3 of the stored K=8 proof, a public instance (clients/ts/published/k8-proof.json)
+hash 0x2307d7c69cde750edc401fc23a290320ed86bd20d5bcd821c4688759fc2b01c7  # input commitment of lane 4 of the stored K=8 proof, a public instance (clients/ts/published/k8-proof.json)
+hash 0x1fbb8bb202f1a3a605ea4b9c59976f332388199f37e7d9fc8e6bde64fd8ff2fb  # input commitment of lane 5 of the stored K=8 proof, a public instance (clients/ts/published/k8-proof.json)
+hash 0x17c2227e34db5fb320a94e3152f46182c8e6d00b708bc294881a52ff2dcfa6c2  # input commitment of lane 6 of the stored K=8 proof, a public instance (clients/ts/published/k8-proof.json)
+hash 0x1199eab63971487dac6910833968297fa0572e27c525c99983ed4cfec4f54f4c  # input commitment of lane 7 of the stored K=8 proof, a public instance (clients/ts/published/k8-proof.json)
+
+# ── Testnet transactions (measurements/2026-11-24-testnet/README.md) ─────────
+hash 0x7387e2b54b7d8c2150aafa40263dd84d7d6403aa562ac865d1d11467b5454461  # Base Sepolia transaction: settle, first payment to the payee
+hash 0xb16a286f8d2305799f9e8f218d334d3d69b3e29dd45c56a497ef18d5375ce50b  # Base Sepolia transaction: settle, steady
+hash 0x38eefe0c8722c6d833f16e09c1420987107c970dfd55f23cf9a6ee18f35dbf8d  # Base Sepolia transaction: open
+hash 0xbb4a19fde8033f6db7bcf867f2040a9c6da51d481c0aaf0e1d645af1baec094e  # Base Sepolia transaction: release
+hash 0xb906fd866d6dafa06ef67bb706a895611c199d4401a21d80250430f24d9dbcc3  # Base Sepolia transaction: openChannel
+hash 0xc5190aa38691eaf655138341988324cad41bc146f0495494b116fa9e5cefde73  # Base Sepolia transaction: settleBatch, first
+hash 0x771d3e2c4bd4e7f0d0018543aa0a786e3a9ad2b23673c4e5b4cff3611740913a  # Base Sepolia transaction: settleBatch, steady
+
+# ── Keywords ────────────────────────────────────────────────────────────────
+kw private_key circuits/spike-mlp/*.py  # variable and argument name; the value is Anvil default key 0
+kw private_key measurements/*/*.py      # argument name; the value is an Anvil default key
+kw sepolia measurements/2026-09-28-k16/price_k16.py  # read-only fee query against the testnet's public endpoint
+kw sepolia foundry.toml  # comment naming the target testnet whose gas schedule the tests follow
+kw sepolia README.md  # names the testnet in the gas table
+kw sepolia measurements/2026-11-23-solo-settlement/README.md  # names the testnet whose USDC was measured on a fork
+kw sepolia test/SoloSettlementFork.t.sol  # names the forked testnet; the endpoint comes from FORK_RPC_URL
+kw sepolia measurements/2026-11-23-channel-settlement/README.md  # names the testnet whose USDC was measured on a fork
+kw sepolia test/ChannelSettlementFork.t.sol  # names the forked testnet; the endpoint comes from FORK_RPC_URL
+kw sepolia docs/deployment-notes.md  # names the target testnet of the deployment
+kw sepolia measurements/2026-11-24-channel-close/README.md  # names the testnet whose USDC was measured on a fork
+kw sepolia test/AuthCaptureBase.sol  # names the testnet whose chain id the tests use
+kw sepolia test/AuthCaptureGas.t.sol  # names the forked testnet; the endpoint comes from FORK_RPC_URL
+kw sepolia measurements/2026-11-24-x402-auth-capture/README.md  # names the testnet whose USDC was measured on a fork
+kw sepolia script/DeployBaseSepolia.s.sol  # the deployment script for the testnet; the endpoint is passed on the command line
+kw sepolia scripts/deploy.sh  # wrapper for that script; its default endpoint is the testnet's public one
+kw sepolia scripts/escrow_live_check.py  # names the testnet whose escrow it compares
+kw sepolia test/DeployBaseSepolia.t.sol  # tests of the deployment script, named after it
+kw sepolia test/DeployBaseSepoliaFork.t.sol  # names the forked testnet; the endpoint comes from FORK_RPC_URL
+kw sepolia SECURITY.md  # names the testnet whose escrow was compared with the source
+kw sepolia test/MUTATIONS.md  # names the deployment script and its tests, whose names carry the testnet's
+kw sepolia deployments/*  # each deployment record names its network
+kw sepolia scripts/check_deployment.py  # checks the testnet deployment; the endpoint is passed on the command line
+kw sepolia quickstart.sh  # the quickstart pays the testnet deployment
+kw sepolia clients/ts/*  # the client and quickstart for the testnet deployment; the default endpoint is the testnet's public one
+kw basescan clients/ts/*  # the testnet explorer's link to a transaction, printed by the quickstart
+kw sepolia clients/python/*  # the middleware's usage names the testnet deployment record
+kw sepolia MEASUREMENTS.md  # names the testnet of the deployment and of the fork the USDC rows were measured on
+kw sepolia measurements/2026-11-24-testnet/README.md  # gas of transactions on the testnet; names its public endpoint
+hash 0xbfc219d647efafebb7db189aa5b4f35703e4fbb226ff9ba9b9b907c56b1f84cf  # keccak256 of the Halo2EzklAdapter runtime bytecode, as registered in both testnet entries
+hash 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470  # keccak256 of the empty string (Keccak test vector)
+hash 0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45  # keccak256("abc") (Keccak test vector)
+hash 0x96ea54061def936c4be90b518992fdc6f12f535068a256229aca54267b4d084d  # keccak256 of 200 bytes "a", a two-block test vector computed with cast keccak
+hash 0x0479d44fdf9c501c25337fdc540419f1593b884a87b47f023da4f1c700fda782  # SHA-256 of solc 0.8.20 linux-amd64 release, binaries.soliditylang.org/linux-amd64/list.json
+hash 0xfc329945e0068e4e955d0a7b583776dc8d25e72ab657a044618a7ce7dd0519aa  # SHA-256 of solc 0.8.20 macosx-amd64 release, binaries.soliditylang.org/macosx-amd64/list.json
+kw sepolia scripts/verify_entry.py  # compares a testnet registry entry; its default endpoint is the testnet's public one
+kw sepolia scripts/test_verify_entry.py  # reads the testnet deployment record for its fixtures
+kw sepolia specs/*  # the spec's reference implementation is the testnet deployment
+hash 0xd64a7ed62eeeaf099a7ec8d83931e4d1aa99df94f1376645e0e42ad30e5ae1da  # keccak256("halo2-kzg-bn254/ezkl"), Halo2EzklAdapter.PROOF_SYSTEM, as the deployed adapter reports it
+hash 0x7414dc57cfce12d3aa8914fd5577a62a0cb2181045a0d545d66895792c0e4190  # VerifierRegistry.entryHash of the solo entry (keccak256 of its encoding), read from the testnet
+hash 0x5d86dad28fc553149c2d5b8164c2e0e6628894722eeee0322d2194eefb8d3126  # VerifierRegistry.entryHash of the K=8 entry, read from the testnet
+hash 0x086eb718535582f7a7102ae95bad480d16f21708f9dd64d299864718f8c43c1c  # SHA-256 of the solo settings.json with its two range checks swapped (measurements/2026-11-24-verify-entry/)
+hash 0xc42837ffafe2174fed53586db813520426c4b46582a6ef9b7f7ccf35bc2005d2  # SHA-256 of the verifying key set up from those swapped settings
+hash 0x46b51e376a9156715635ec2f4ac5f6d6cd3699dcf910ae1012534c80bdbada68  # keccak256 of that verifying key
+hash 0xc12941bd560d8fed9b25a71242139c18d19ae41dc5ab57ecb925b0c3558ae197  # SHA-256 of the verifier source generated from that key
+hash 0xc876948563dd1d921da114f0ff30e8e2cee7b420e8b48f96e1fe57db6270afbe  # keccak256 of that verifier's runtime bytecode, metadata trailer removed
+kw sepolia measurements/2026-11-24-verify-entry/*  # results of comparing the testnet registry entries; they name the public endpoint read

@@ -1,0 +1,115 @@
+{
+  "circuit": "solo",
+  "mode": "full",
+  "verifierId": "0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b",
+  "deployment": "deployments/base-sepolia.json",
+  "rpc": "https://sepolia.base.org",
+  "block": 63082345,
+  "result": "MATCH",
+  "checks": [
+    {
+      "check": "input settings.json: SHA-256 = provenance/",
+      "ok": true,
+      "detail": "dcae92a6d5fd8435b299b2df1f727a370fbdf9db9461e6d997c7bdd4b94ac6c4"
+    },
+    {
+      "check": "input srs.bin: SHA-256 = provenance/",
+      "ok": true,
+      "detail": "e4690b6479fceefdc2486372ceeaf274d7a336f908463caa619b7bc42ebfe9be"
+    },
+    {
+      "check": "input model.onnx: SHA-256 = provenance/",
+      "ok": true,
+      "detail": "c3caeb161859f91da3233830c3f43e5ed9f0c47cdc2913d1a48ffe42a3a51e90"
+    },
+    {
+      "check": "input model.onnx.data: SHA-256 = provenance/",
+      "ok": true,
+      "detail": "b96f93301048ea7af8eeaca094fee834111a4c1a3a639f17fb5f61b0b13a2612"
+    },
+    {
+      "check": "regenerated verifying key: SHA-256 = pinned vk.key",
+      "ok": true,
+      "detail": "32439290a76c2ef71fb6f20ef203b001b54d9835b411554bae827df5364e9523"
+    },
+    {
+      "check": "regenerated verifier source: SHA-256 = pinned",
+      "ok": true,
+      "detail": "5e9000bc433c2750068a876dce558deb97d8073c3368310bc58c9f9d9987784b"
+    },
+    {
+      "check": "chain id",
+      "ok": true,
+      "detail": "84532"
+    },
+    {
+      "check": "registry has code",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "entry is registered",
+      "ok": true,
+      "detail": "0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b"
+    },
+    {
+      "check": "entry() is the registered entry (keccak256 of its encoding = entryHash)",
+      "ok": true,
+      "detail": "0x7414dc57cfce12d3aa8914fd5577a62a0cb2181045a0d545d66895792c0e4190"
+    },
+    {
+      "check": "entry shape: lanes",
+      "ok": true,
+      "detail": "1 (circuit: 1)"
+    },
+    {
+      "check": "entry shape: outputSize",
+      "ok": true,
+      "detail": "320 (circuit: 320)"
+    },
+    {
+      "check": "adapter reports the EZKL proof system",
+      "ok": true,
+      "detail": "0xd64a7ed62eeeaf099a7ec8d83931e4d1aa99df94f1376645e0e42ad30e5ae1da"
+    },
+    {
+      "check": "verifier id = computeId(proof system, entry)",
+      "ok": true,
+      "detail": "0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b"
+    },
+    {
+      "check": "adapter's code hash = entry.adapterCodeHash",
+      "ok": true,
+      "detail": "0xbfc219d647efafebb7db189aa5b4f35703e4fbb226ff9ba9b9b907c56b1f84cf"
+    },
+    {
+      "check": "verifier's code hash = entry.targetCodeHash",
+      "ok": true,
+      "detail": "0x8cd0b80f6b67e187a9ee98478fdd1278b8e1b666d666d442920aaf911f485f49"
+    },
+    {
+      "check": "verifier is not a delegated account (EIP-7702)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "keccak256(regenerated verifying key) = entry.vkHash",
+      "ok": true,
+      "detail": "0x13cff0426abe00c941934bdd6bb7757f2e703fb9f6862bf08a783eeca08b4ff2"
+    },
+    {
+      "check": "regenerated verifier = on-chain verifier, metadata trailer removed",
+      "ok": true,
+      "detail": "0xf60aad67ed7bf1b55cc6cb097b1997036617c161fbaa7f0fd80661c3bfc7b17c (17939 bytes) vs 0xf60aad67ed7bf1b55cc6cb097b1997036617c161fbaa7f0fd80661c3bfc7b17c (17939 bytes)"
+    }
+  ],
+  "seconds": {
+    "key setup": 18.0,
+    "verifier source": 0.29,
+    "compile": 0.17,
+    "chain reads": 1.17,
+    "total": 21.68
+  },
+  "peakRssMB": 996,
+  "machine": "Linux x86_64, 2 vCPUs of an Intel Xeon Gold 5220R"
+}

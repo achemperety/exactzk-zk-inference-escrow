@@ -1,0 +1,74 @@
+{
+  "transactions": [
+    {
+      "scenario": "step1_anchor_cold_real",
+      "tx_hash": "be78d6a8306a519d274d5aad351024eecc6cb4211d14f373eb08965ed97662d0",
+      "gasUsed_script": 1265247,
+      "status": 1,
+      "gasUsed_cast": 1265247,
+      "match": true
+    },
+    {
+      "scenario": "step3a_mock_cold_provider_zero",
+      "tx_hash": "4dd419cb51ff908fd90cc42d08a0cbd8149d6fbbd97d228f1bb7a36544d47964",
+      "gasUsed_script": 629863,
+      "status": 1,
+      "provider_bal_before": 0,
+      "provider_bal_after": 8000000,
+      "gasUsed_cast": 629863,
+      "match": true
+    },
+    {
+      "scenario": "step3b_mock_cold_provider_prefunded",
+      "tx_hash": "851b1231e5d073b5ecb7545990f111a63dc2e802958ade741a36f3fa804d3650",
+      "gasUsed_script": 612787,
+      "status": 1,
+      "provider_bal_before": 12345678,
+      "provider_bal_after": 20345678,
+      "gasUsed_cast": 612787,
+      "match": true
+    },
+    {
+      "scenario": "step2_direct_steady_seq2",
+      "tx_hash": "3557ab46c0a11f30deb6bc8848c29c8e805071203982cdbc60be05985eaae7a2",
+      "gasUsed_script": 1111371,
+      "status": 1,
+      "gasUsed_cast": 1111371,
+      "match": true
+    },
+    {
+      "scenario": "step2_steady_sanity_seq3",
+      "tx_hash": "42a22e1c005eb6adff624a1d561f8505cd5f7158178b3f445181ff2eb9e9e4e7",
+      "gasUsed_script": 1111383,
+      "status": 1,
+      "gasUsed_cast": 1111383,
+      "match": true
+    }
+  ],
+  "step1_gate": {
+    "expected": 1265211,
+    "measured": 1265247,
+    "diff": 36,
+    "pass": true
+  },
+  "step3_comparison": {
+    "a_minus_b": 17076,
+    "a_vs_612763": 17100,
+    "b_vs_592831": 19956
+  },
+  "fresh_proof_job_final_status": {
+    "state": "proved",
+    "elapsed_s": 21.662694931030273,
+    "proof_path": "measurements/2026-09-18-steady/proof2.json",
+    "ts": 1789755406.912499
+  },
+  "fresh_proof_verifies_against_fixturesK8_verifier": true,
+  "step2_proof_source": "freshly generated via ezkl.prove() on current pk.key/witness.json, verified OK",
+  "step2_derive": {
+    "cold_gas": 1265247,
+    "steady_gas": 1111371,
+    "steady_sanity_gas_seq3": 1111383,
+    "steady_per_request": 138921,
+    "cold_minus_steady": 153876
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "steady": {
+    "gas_per_request": 96400.5625,
+    "calldata_bytes_per_request": 894.25,
+    "l2_exec_usd": 0.0017352,
+    "l1_data_usd": 0.000118694580129,
+    "total_usd": 0.001853894580129
+  },
+  "cold": {
+    "gas_per_request": 114574.5625,
+    "calldata_bytes_per_request": 894.25,
+    "l2_exec_usd": 0.002062332,
+    "l1_data_usd": 0.000118694580129,
+    "total_usd": 0.002181026580129
+  },
+  "k8_steady_crosscheck_total_usd": 0.0026550565707959997,
+  "solo_settle_crosscheck_total_usd": 0.013641008986317,
+  "oracle": {
+    "block_number": 47418562,
+    "base_fee_scalar": 1101,
+    "blob_base_fee_scalar": 659851,
+    "l1_base_fee_gwei": 1.049758805,
+    "blob_base_fee_gwei": 0.056969921,
+    "l2_gas_price_gwei": 0.006,
+    "eth_usd": 3000.0
+  }
+}
