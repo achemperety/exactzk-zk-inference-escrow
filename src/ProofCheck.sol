@@ -85,6 +85,27 @@ library ProofCheck {
         return _call(e, abi.encodeCall(IProofVerifier.verify, (e.target, e.outputSize, commitments, output, proof)));
     }
 
+    /// @notice `checkOne` for arguments held in memory: a caller that receives the entry, output and
+    /// proof ABI-encoded inside one `bytes` argument (an `auth-capture` policy's `policyData`) decodes
+    /// them into memory.
+    /// @dev Same rules and result as `checkOne`.
+    function checkOneInMemory(
+        IVerifierRegistry registry,
+        bytes32 verifierId,
+        VerifierEntry memory e,
+        bytes32 commitment,
+        bytes memory output,
+        bytes memory proof
+    ) internal view returns (ProofStatus) {
+        bytes32 registered = registry.entryHash(verifierId);
+        if (registered == bytes32(0) || registered != keccak256(abi.encode(e))) return ProofStatus.Unverifiable;
+        if (!_codeMatches(e)) return ProofStatus.Unverifiable;
+        if (e.lanes != 1 || output.length != e.outputSize) return ProofStatus.Invalid;
+        bytes32[] memory commitments = new bytes32[](1);
+        commitments[0] = commitment;
+        return _call(e, abi.encodeCall(IProofVerifier.verify, (e.target, e.outputSize, commitments, output, proof)));
+    }
+
     function _run(VerifierEntry memory e, bytes32[] calldata commitments, bytes calldata outputs, bytes calldata proof)
         private
         view
