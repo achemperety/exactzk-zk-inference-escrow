@@ -16,7 +16,7 @@ interface IEscrowStoresR {
     function tokenStoreImplementation() external view returns (address);
 }
 
-/// PROTOTYPE: hash-only `policyData`. The proof is checked once by `recordCheck`; the policy hook
+/// The profile's optional two-step route: hash-only `policyData`. The proof is checked once by `recordCheck`; the policy hook
 /// reads the recorded result by hash. Against x402's escrow built from source, on the `"custom"`
 /// route through the unchanged `PolicyCaptureOperator`.
 abstract contract RecordedProofPolicyBase is AuthCaptureBase {
@@ -311,7 +311,8 @@ contract RecordedProofPolicyGasTest is RecordedProofPolicyGasBase {
         _log("recordCheck, a fresh record", rec);
         _log("captureWithPolicy, hash-only policyData, steady", cap);
         emit log_named_uint("recordCheck + captureWithPolicy", rec.total + cap.total);
-        assertLe(rec.total + cap.total, 1_000_000, "a loose bound; the figure is recorded in MUTATIONS.md");
+        assertLe(rec.total, 728_200, "pin: measured 727,888");
+        assertLe(cap.total, 74_600, "pin: measured 74,270");
     }
 }
 

@@ -902,7 +902,7 @@ Run on 2026-11-25 on the Mac, EZKL 23.0.5. Unmutated, the script exits 0: the co
 
 ## The two-step route of the auth-capture profile: `RecordedProofPolicy` (`test/experimental/hash-policy/`)
 
-Run on 2026-11-25. 10 mutations of `RecordedProofPolicy.sol`, run with `--match-path 'test/experimental/hash-policy/*.t.sol'` and restored byte for byte afterwards. All were caught. `setUp` in a row is the gas suite's: under HP10 its own capture is refused.
+Run on 2026-11-25. 12 mutations of `RecordedProofPolicy.sol`, run with `--match-path 'test/experimental/hash-policy/*.t.sol'` and restored byte for byte afterwards. All were caught. `setUp` in a row is the gas suite's: under HP10 its own capture is refused. HP11 and HP12 were run when the route was merged as the profile's option, to show the two gas pins of `test_gas_record_check_then_capture_steady` (728,200 and 74,600) fail; every behaviour test passes under both.
 
 | Id | Deliberate breakage | Tests that failed |
 |---|---|---|
@@ -916,3 +916,5 @@ Run on 2026-11-25. 10 mutations of `RecordedProofPolicy.sol`, run with `--match-
 | HP8 | a stored result is checked again instead of returned | 1: `test_a_record_never_changes` |
 | HP9 | the record event without the output | 1: `test_anyone_records_anyone_captures_and_the_output_is_in_the_record_event` |
 | HP10 | the record key hashes the proof without the output | 4: `setUp`, `test_a_proof_can_be_presented_again_after_verifier_unavailable`, `test_a_recorded_invalid_proof_is_proof_invalid_and_does_not_block_the_real_one`, `test_anyone_records_anyone_captures_and_the_output_is_in_the_record_event` |
+| HP11 | `recordCheck` writes a second storage slot | 1: `test_gas_record_check_then_capture_steady` (`recordCheck` 730,172 > 728,200) |
+| HP12 | the policy hook also reads the registry entry | 1: `test_gas_record_check_then_capture_steady` (capture 88,917 > 74,600) |
