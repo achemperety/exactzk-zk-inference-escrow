@@ -11,36 +11,40 @@ import {ProofCheck, ProofStatus} from "../../../src/ProofCheck.sol";
 
 /// @title ProofClaimGate (PROTOTYPE, not for deployment)
 /// @notice A claim condition for x402's `batch-settlement` channels: a voucher's value is claimed only
-/// for requests whose input commitments the payer signed and a valid proof covers. The gate is the
-/// channel's `receiverAuthorizer` and its `receiver`; the voucher format is unchanged.
+/// for requests whose input commitments the payer signed and a valid proof covers, and it is paid to
+/// the payee the payer committed for that request. The gate is the channel's `receiverAuthorizer` and
+/// its `receiver`; the voucher format is unchanged.
 ///
 /// - The payer signs once per batch an EIP-712 `CommitmentRoot` in this gate's domain: the channel, the
-///   verifier, the root of a Merkle tree over the batch's ordered input commitments, the count, the
-///   price per proven request and the amount already claimed before the batch.
-/// - A claim presents one commitment with its position and an inclusion path, and a proof for it. The
-///   gate checks the root signature, the inclusion at that position, and the proof against that very
-///   commitment, then claims the payer's voucher up to `baseClaimed + proven * unitPrice`.
+///   verifier, the root of a Merkle tree over the batch's ordered requests, each an input commitment
+///   with its payee, the count, the price per proven request and the amount already claimed before
+///   the batch.
+/// - A claim presents one request (commitment and payee) with its position and an inclusion path, and a
+///   proof for the commitment. The gate checks the root signature, the inclusion at that position, and
+///   the proof against that very commitment, then claims exactly one `unitPrice` more on the payer's
+///   voucher, never past `baseClaimed + proven * unitPrice`, and forwards that unit to the request's
+///   payee in the same call. Who calls is not checked: presenting a proof is permissionless, and the
+///   caller cannot change where the unit goes.
 ///
 /// The gate must also be the channel's `receiver`: `x402BatchSettlement.claim` admits the receiver as
 /// well as the receiver authorizer, so a receiver other than the gate could claim without a proof. The
-/// gate therefore receives the settled funds and forwards them to `payee`. It implements no ERC-1271,
-/// so `claimWithSignature` and `refundWithSignature` cannot be authorized for its channels; the payer
+/// gate therefore receives the settled unit and passes it on. It implements no ERC-1271, so
+/// `claimWithSignature` and `refundWithSignature` cannot be authorized for its channels; the payer
 /// leaves through the timed withdrawal.
 ///
-/// Tree: leaf `i` is `keccak256(abi.encode(LEAF_TAG, i, commitment_i))`; leaves past `count` are zero
-/// up to the next power of two; a node is `keccak256(left ‖ right)`; the path goes from the leaf up,
-/// and bit `j` of the position says whether the node at height `j` is a right child.
+/// Tree: leaf `i` is `keccak256(abi.encode(LEAF_TAG, i, commitment_i, payee_i))`; leaves past `count`
+/// are zero up to the next power of two; a node is `keccak256(left ‖ right)`; the path goes from the
+/// leaf up, and bit `j` of the position says whether the node at height `j` is a right child.
 contract ProofClaimGate is EIP712 {
     using SafeERC20 for IERC20;
 
     bytes32 public constant COMMITMENT_ROOT_TYPEHASH = keccak256(
         "CommitmentRoot(bytes32 channelId,bytes32 verifierId,bytes32 root,uint32 count,uint128 unitPrice,uint128 baseClaimed)"
     );
-    bytes32 public constant LEAF_TAG = keccak256("x402.proof-claim-gate.leaf.v0");
+    bytes32 public constant LEAF_TAG = keccak256("x402.proof-claim-gate.leaf.v1");
 
     x402BatchSettlement public immutable settlement;
     IVerifierRegistry public immutable registry;
-    address public immutable payee;
 
     /// @notice What the payer signs once per batch, apart from the channel id the gate computes.
     struct RootTerms {
@@ -51,10 +55,12 @@ contract ProofClaimGate is EIP712 {
         uint128 baseClaimed;
     }
 
-    /// @notice One commitment, where it sits in the batch, and the path to the root.
+    /// @notice One request (its input commitment and its payee), where it sits in the batch, and the
+    /// path to the root.
     struct Inclusion {
         uint32 position;
         bytes32 commitment;
+        address payee;
         bytes32[] path;
     }
 
@@ -62,7 +68,12 @@ contract ProofClaimGate is EIP712 {
     mapping(bytes32 rootDigest => uint32) public provenCount;
 
     event ClaimProven(
-        bytes32 indexed channelId, bytes32 indexed rootDigest, uint32 position, bytes32 commitment, bytes output
+        bytes32 indexed channelId,
+        bytes32 indexed rootDigest,
+        uint32 position,
+        bytes32 commitment,
+        address indexed payee,
+        bytes output
     );
 
     error NotThisGate();
@@ -73,16 +84,15 @@ contract ProofClaimGate is EIP712 {
     error ProofInvalid();
     error VerifierUnavailable(bytes32 verifierId);
     error ClaimExceedsProven(uint128 totalClaimed, uint256 ceiling);
+    error ClaimNotOneUnit(uint128 totalClaimed, uint256 expected);
 
-    constructor(x402BatchSettlement settlement_, IVerifierRegistry registry_, address payee_)
-        EIP712("x402 proof claim gate", "0")
-    {
+    constructor(x402BatchSettlement settlement_, IVerifierRegistry registry_) EIP712("x402 proof claim gate", "0") {
         settlement = settlement_;
         registry = registry_;
-        payee = payee_;
     }
 
-    /// @notice Claim a voucher for one more proven request of a signed batch. Anyone may call this.
+    /// @notice Claim one unit of a voucher for one more proven request of a signed batch, and pay it to
+    /// that request's committed payee. Anyone may call this.
     function claimWithProof(
         x402BatchSettlement.VoucherClaim calldata vc,
         RootTerms calldata r,
@@ -111,18 +121,18 @@ contract ProofClaimGate is EIP712 {
         uint32 n = ++provenCount[rootDigest];
         uint256 ceiling = uint256(r.baseClaimed) + uint256(n) * r.unitPrice;
         if (vc.totalClaimed > ceiling) revert ClaimExceedsProven(vc.totalClaimed, ceiling);
+        // Exactly one unit per proof: a claim that moved less would leave value for a later request's
+        // payee to collect, and one that moved more would take it from an earlier one.
+        (, uint128 before) = settlement.channels(channelId);
+        uint256 expected = uint256(before) + r.unitPrice;
+        if (vc.totalClaimed != expected) revert ClaimNotOneUnit(vc.totalClaimed, expected);
 
         x402BatchSettlement.VoucherClaim[] memory claims = new x402BatchSettlement.VoucherClaim[](1);
         claims[0] = vc;
         settlement.claim(claims);
-        emit ClaimProven(channelId, rootDigest, inc.position, inc.commitment, output);
-    }
-
-    /// @notice Sweep what the channel contract owes this gate for `token` and forward it to the payee.
-    function payout(address token) external {
-        settlement.settle(address(this), token);
-        uint256 balance = IERC20(token).balanceOf(address(this));
-        if (balance > 0) IERC20(token).safeTransfer(payee, balance);
+        settlement.settle(address(this), c.token);
+        IERC20(c.token).safeTransfer(inc.payee, r.unitPrice);
+        emit ClaimProven(channelId, rootDigest, inc.position, inc.commitment, inc.payee, output);
     }
 
     // ── Views ───────────────────────────────────────────────────────────────────────────────────
@@ -137,8 +147,8 @@ contract ProofClaimGate is EIP712 {
         );
     }
 
-    function leafHash(uint32 position, bytes32 commitment) public pure returns (bytes32) {
-        return keccak256(abi.encode(LEAF_TAG, position, commitment));
+    function leafHash(uint32 position, bytes32 commitment, address payee) public pure returns (bytes32) {
+        return keccak256(abi.encode(LEAF_TAG, position, commitment, payee));
     }
 
     /// @notice Whether `inc` opens `root` at its position, for a tree over `count` leaves.
@@ -146,7 +156,7 @@ contract ProofClaimGate is EIP712 {
         uint256 depth;
         while ((uint256(1) << depth) < count) depth++;
         if (inc.path.length != depth) return false;
-        bytes32 node = leafHash(inc.position, inc.commitment);
+        bytes32 node = leafHash(inc.position, inc.commitment, inc.payee);
         uint256 index = inc.position;
         for (uint256 i = 0; i < depth; i++) {
             bytes32 sibling = inc.path[i];
