@@ -886,3 +886,17 @@ Run on 2026-11-25. `claimWithProof` now takes the request as the payer signed it
 | LP15 | gate answers ERC-1271 for any signature | 1: `test_without_the_gate_nobody_claims_or_signs_for_its_channel` |
 
 As with BP5, LP5–LP7 make the gate and the signer disagree on every leaf, so `test_a_presenter_cannot_name_the_payout` passes on its own (every payee is refused, the committed one included); `testFuzz_a_presenter_cannot_name_the_payout`, which also requires the committed payee to open the leaf, fails on each.
+
+## The reference case (`scripts/reference_case.py`)
+
+Run on 2026-11-25 on the Mac, EZKL 23.0.5. Unmutated, the script exits 0: the commitment and all ten outputs equal the stored proof's. Each mutated file was restored byte for byte afterwards. The script is not run in CI, which does not install EZKL.
+
+| Id | Deliberate breakage | What happened |
+|---|---|---|
+| RC1 | one feature of `input.json` changed by 0.5 | exit 1 at the SHA-256 check of `input.json` |
+| RC2 | the same, with the SHA-256 check skipped | exit 1: the input commitment and the output both differ |
+| RC3 | the last nonce value changed by 1, the SHA-256 check skipped | exit 1: the input commitment differs; the output does not, since the network ignores the nonces |
+| RC4 | field elements read big-endian | exit 1: the commitment and the output differ |
+| RC5 | the output not compared | **exit 0 on the published files**: no case above changes the output alone |
+| RC6 | the published output's first value changed, 656 to 657 (`clients/ts/published/solo-proof.json`) | exit 1 at the output; with RC5 applied as well, exit 0, so RC6 is the case that catches RC5 |
+

@@ -124,6 +124,7 @@ kw sepolia test/ChannelSettlementFork.t.sol  # names the forked testnet; the end
 kw sepolia docs/deployment-notes.md  # names the target testnet of the deployment
 kw sepolia measurements/2026-11-24-channel-close/README.md  # names the testnet whose USDC was measured on a fork
 kw sepolia test/AuthCaptureBase.sol  # names the testnet whose chain id the tests use
+kw sepolia scripts/reference_case.py  # reads the solo verifier id from deployments/base-sepolia.json
 kw sepolia test/AuthCaptureGas.t.sol  # names the forked testnet; the endpoint comes from FORK_RPC_URL
 kw sepolia test/ProofCapturePolicyGas.t.sol  # names the forked testnet; the endpoint comes from FORK_RPC_URL
 kw sepolia measurements/2026-11-24-x402-auth-capture/README.md  # names the testnet whose USDC was measured on a fork

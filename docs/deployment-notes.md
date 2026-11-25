@@ -19,6 +19,16 @@ These notes record what the testnet deployment does and what it was checked agai
 
 The quickstart's payee, a separate testnet-only account, is in `deployments/base-sepolia-quickstart.json`. Gas of the deployment's transactions in use is in `measurements/2026-11-24-testnet/`.
 
+## Source verification
+
+**`ProofEvaluator8183` on Sourcify, checked 2026-11-25.** Sourcify holds a verification of the evaluator on Base Sepolia, made on 2026-11-24 at 18:23:45 UTC: `match` for both the creation and the runtime code. The deployment day did not record it here; it is recorded now in [deployments/base-sepolia-source-verification.json](../deployments/base-sepolia-source-verification.json). `match` rather than `exact_match` is the most Sourcify can give: the contracts are compiled without CBOR metadata, so there is no metadata hash to match exactly. Sourcify accepts one verification per address, so nothing was submitted again; instead both sides were compared with this public tree:
+
+- Sourcify's 14 source files equal this repository's at tag `v3.0.0-testnet`. At `main` (`fd1ce61`), 13 are equal and `src/ProofCheck.sol` differs only by `checkOneInMemory`, a function added for the policy profile that the evaluator does not use.
+- Its settings are this repository's `foundry.toml`: solc 0.8.28, via IR, optimizer at 1,000,000 runs, EVM `prague`, no metadata.
+- The runtime code built from `main` equals the code on chain (`cast code`, 5,463 bytes) outside the evaluator's two immutable slots, which hold the registry's address.
+
+The other contracts of the deployment were not looked up on Sourcify.
+
 ## How to deploy
 
 `script/DeployBaseSepolia.s.sol` performs the order below; the holder of the deployer keystore runs it through `scripts/deploy.sh`:
