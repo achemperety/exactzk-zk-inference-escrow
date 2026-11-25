@@ -19,12 +19,13 @@ import {ProofCheck, ProofStatus} from "../../../src/ProofCheck.sol";
 ///   verifier, the root of a Merkle tree over the batch's ordered requests, each an input commitment
 ///   with its payee, the count, the price per proven request and the amount already claimed before
 ///   the batch.
-/// - A claim presents one request (commitment and payee) with its position and an inclusion path, and a
-///   proof for the commitment. The gate checks the root signature, the inclusion at that position, and
-///   the proof against that very commitment, then claims exactly one `unitPrice` more on the payer's
-///   voucher, never past `baseClaimed + proven * unitPrice`, and forwards that unit to the request's
-///   payee in the same call. Who calls is not checked: presenting a proof is permissionless, and the
-///   caller cannot change where the unit goes.
+/// - A claim presents one signed leaf, `Leaf{inputCommitment, payee}`, as the payer signed it, with its
+///   position and an inclusion path, and a proof for the commitment. The gate checks the root
+///   signature, the inclusion of that leaf at that position, and the proof against that very
+///   commitment, then claims exactly one `unitPrice` more on the payer's voucher, never past
+///   `baseClaimed + proven * unitPrice`, and pays that unit to `leaf.payee` in the same call. The claim
+///   has no payout argument: the payee is read only from the signed leaf. Who calls is not checked:
+///   presenting a proof is permissionless, and a presenter cannot name the payout.
 ///
 /// The gate must also be the channel's `receiver`: `x402BatchSettlement.claim` admits the receiver as
 /// well as the receiver authorizer, so a receiver other than the gate could claim without a proof. The
@@ -32,7 +33,8 @@ import {ProofCheck, ProofStatus} from "../../../src/ProofCheck.sol";
 /// `claimWithSignature` and `refundWithSignature` cannot be authorized for its channels; the payer
 /// leaves through the timed withdrawal.
 ///
-/// Tree: leaf `i` is `keccak256(abi.encode(LEAF_TAG, i, commitment_i, payee_i))`; leaves past `count`
+/// Tree: leaf `i` is `keccak256(abi.encode(LEAF_TAG, i, leaf_i))`, that is, of the tag, the position,
+/// the input commitment and the payee, each in one 32-byte word; leaves past `count`
 /// are zero up to the next power of two; a node is `keccak256(left ‖ right)`; the path goes from the
 /// leaf up, and bit `j` of the position says whether the node at height `j` is a right child.
 contract ProofClaimGate is EIP712 {
@@ -55,12 +57,15 @@ contract ProofClaimGate is EIP712 {
         uint128 baseClaimed;
     }
 
-    /// @notice One request (its input commitment and its payee), where it sits in the batch, and the
-    /// path to the root.
+    /// @notice One request of a batch, exactly as the payer signed it under the root.
+    struct Leaf {
+        bytes32 inputCommitment;
+        address payee;
+    }
+
+    /// @notice Where a leaf sits in the batch, and the path from it to the root.
     struct Inclusion {
         uint32 position;
-        bytes32 commitment;
-        address payee;
         bytes32[] path;
     }
 
@@ -92,11 +97,12 @@ contract ProofClaimGate is EIP712 {
     }
 
     /// @notice Claim one unit of a voucher for one more proven request of a signed batch, and pay it to
-    /// that request's committed payee. Anyone may call this.
+    /// the payee of that request's signed leaf. Anyone may call this; nothing in the call names a payout.
     function claimWithProof(
         x402BatchSettlement.VoucherClaim calldata vc,
         RootTerms calldata r,
         bytes calldata rootSignature,
+        Leaf calldata leaf,
         Inclusion calldata inc,
         VerifierEntry calldata e,
         bytes calldata output,
@@ -110,10 +116,10 @@ contract ProofClaimGate is EIP712 {
         if (!SignatureChecker.isValidSignatureNow(signer, rootDigest, rootSignature)) revert RootSignatureInvalid();
 
         if (inc.position >= r.count) revert PositionOutOfRange(inc.position, r.count);
-        if (!includes(r.root, r.count, inc)) revert InclusionInvalid();
+        if (!includes(r.root, r.count, leaf, inc)) revert InclusionInvalid();
         if (proven[rootDigest][inc.position]) revert AlreadyProven(inc.position);
 
-        ProofStatus s = ProofCheck.checkOne(registry, r.verifierId, e, inc.commitment, output, proof);
+        ProofStatus s = ProofCheck.checkOne(registry, r.verifierId, e, leaf.inputCommitment, output, proof);
         if (s == ProofStatus.Unverifiable) revert VerifierUnavailable(r.verifierId);
         if (s != ProofStatus.Valid) revert ProofInvalid();
 
@@ -131,8 +137,8 @@ contract ProofClaimGate is EIP712 {
         claims[0] = vc;
         settlement.claim(claims);
         settlement.settle(address(this), c.token);
-        IERC20(c.token).safeTransfer(inc.payee, r.unitPrice);
-        emit ClaimProven(channelId, rootDigest, inc.position, inc.commitment, inc.payee, output);
+        IERC20(c.token).safeTransfer(leaf.payee, r.unitPrice);
+        emit ClaimProven(channelId, rootDigest, inc.position, leaf.inputCommitment, leaf.payee, output);
     }
 
     // ── Views ───────────────────────────────────────────────────────────────────────────────────
@@ -147,16 +153,20 @@ contract ProofClaimGate is EIP712 {
         );
     }
 
-    function leafHash(uint32 position, bytes32 commitment, address payee) public pure returns (bytes32) {
-        return keccak256(abi.encode(LEAF_TAG, position, commitment, payee));
+    function leafHash(uint32 position, Leaf calldata leaf) public pure returns (bytes32) {
+        return keccak256(abi.encode(LEAF_TAG, position, leaf));
     }
 
-    /// @notice Whether `inc` opens `root` at its position, for a tree over `count` leaves.
-    function includes(bytes32 root, uint32 count, Inclusion calldata inc) public pure returns (bool) {
+    /// @notice Whether `leaf`, at `inc.position` with `inc.path`, opens `root`, for a tree over `count` leaves.
+    function includes(bytes32 root, uint32 count, Leaf calldata leaf, Inclusion calldata inc)
+        public
+        pure
+        returns (bool)
+    {
         uint256 depth;
         while ((uint256(1) << depth) < count) depth++;
         if (inc.path.length != depth) return false;
-        bytes32 node = leafHash(inc.position, inc.commitment, inc.payee);
+        bytes32 node = leafHash(inc.position, leaf);
         uint256 index = inc.position;
         for (uint256 i = 0; i < depth; i++) {
             bytes32 sibling = inc.path[i];

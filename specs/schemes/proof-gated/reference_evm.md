@@ -156,7 +156,7 @@ Local, Osaka schedule, real proofs, every account cold, steady unless marked. US
 | Native, channel: per request in a K=8 batch; K=16 | 113,661; 71,066 |
 | `auth-capture`, terms-authorizer operator: `authorize` + `captureWithProof`; `chargeWithProof`, USDC | 895,250; 836,981 |
 | `auth-capture`, proof policy: `authorize` + `captureWithPolicy`; `chargeWithPolicy`, USDC | 899,361; 841,355 |
-| `batch-settlement` gate (prototype): one claim, steady; the channel's first claim; test token, payee paid in the claim | 793,639; 841,445 |
+| `batch-settlement` gate (prototype): one claim, steady; the channel's first claim; test token, payee paid in the claim | 793,491; 841,297 |
 
 Of each solo-proof row, 577,544 is the generated verifier.
 

@@ -19,7 +19,7 @@ Every requirement (MUST, MUST NOT, SHOULD, MAY) in the specification files, and 
 | 2 | C:42 (property 1) | "Could not be checked" MUST NOT degrade into "invalid"; Invalid only in the case the table names; an unclassified failure MUST NOT be reported as Invalid | `ProofCheck.checkOne`, `checkOneInMemory`: the entry and code are checked before the verifier runs, so a tampered proof against an unknown entry or changed code is `Unverifiable` | `test_an_unknown_entry_…_never_proof_invalid` and `test_changed_code_is_refused_with_verifier_unavailable_never_proof_invalid` (each with a tampered proof as well); mutations PP3, PP6, PC1–PC3 (`test/MUTATIONS.md`) |
 | 3 | C:38 | Policies, gates and operators MUST use the words of P and define none | `PolicyStatus` (`src/ICapturePolicyStatus.sol`); `PolicyCaptureOperator` passes the word on unchanged. The prototype gate reverts with the two contract errors, which R maps to the words | `test_the_operator_refuses_every_word_but_authorized`; `test_the_status_words_and_the_salt_follow_the_derivation`; mutations PP14, PP15, PO3 |
 | 4 | C:43 | Funds MUST reach the server only in a transaction that verified a valid proof for the signed verifier and commitment; that transaction MUST carry the output | `SoloSettlement.settle`, `release`; `ChannelSettlement.settleBatch`; `AuthCaptureProofOperator.captureWithProof`, `chargeWithProof`; `PolicyCaptureOperator.captureWithPolicy`, `chargeWithPolicy` (output in the call data; the event carries `keccak256(policyData)`); `ProofClaimGate.claimWithProof` (`ClaimProven` carries the output) | `test/SoloSettlementOneTransaction.t.sol`, `test/SoloSettlementEscrow.t.sol`, `test/AuthCaptureProofOperator.t.sol`; `test_a_valid_proof_authorizes_and_anyone_captures_for_the_receiver`; `test_a_proof_presented_by_a_third_party_pays_the_committed_payee` |
-| 5 | C:44 | Who presents MUST NOT change where funds go; anyone MAY present where the host lets anyone submit | No sender check in any of the calls in row 4; payment to `terms.payTo`, `paymentInfo.receiver`, or the payee the request's leaf names in the signed root | `test_a_valid_proof_authorizes_and_anyone_captures_for_the_receiver` (a stranger captures, the receiver is paid); gate test of row 4 (a stranger claims, the committed payee is paid); `test_any_caller_presenting_the_same_proof_pays_the_same_payee`; `test_a_claim_cannot_name_a_payee_other_than_the_committed_one`; `testFuzz_no_other_payee_opens_the_committed_request`; mutations BP1–BP5; `test/ChannelInvariant.t.sol` |
+| 5 | C:44 | Who presents MUST NOT change where funds go; anyone MAY present where the host lets anyone submit | No sender check in any of the calls in row 4; payment to `terms.payTo`, `paymentInfo.receiver`, or the payee the request's leaf names in the signed root | `test_a_valid_proof_authorizes_and_anyone_captures_for_the_receiver` (a stranger captures, the receiver is paid); gate test of row 4 (a stranger claims, the committed payee is paid); `test_any_caller_presenting_the_same_proof_pays_the_same_payee`; `test_a_presenter_cannot_name_the_payout`; `testFuzz_a_presenter_cannot_name_the_payout`; mutations BP1–BP5, LP1–LP8; `test/ChannelInvariant.t.sol` |
 | 6 | C:45 | An invalid and an uncheckable proof MUST leave the payment as it was, MUST NOT be recorded, and MUST be two distinct `errorReason` values | Every failure reverts; the words map to two reasons in P; the reference middleware maps the native selectors to two reasons | `test_a_refused_attempt_leaves_the_authorization_capturable`; `test_an_invalid_proof_is_refused_and_the_position_stays_open`; `test/ProofCheck.t.sol`; `clients/e2e/run.sh`, `x402/run_e2e.sh` (native). The facilitator mapping for the policy route: spec only |
 | 7 | C:46 | A failed check MUST NOT end an authorization, a hold or a voucher | Refusals revert before the escrow or channel is called | `test_a_refused_attempt_leaves_the_authorization_capturable` (three refusals, then a capture one second before the deadline); `test_after_refusals_the_payer_reclaims_from_the_capture_deadline_on`; `test_a_refused_charge_moves_nothing_and_the_authorization_stays_usable`; `test_an_invalid_proof_is_refused_and_the_position_stays_open` |
 | 8 | C:47 | Recorded history MUST be terminal only | Native events: `Settled`, `Refunded`; `FrameSettled`, `FrameWaived`, `ChannelFinalized`, `HoldSwept`. `auth-capture`: `CapturedWithProof`, `CapturedWithPolicy`, `ChargedWithPolicy`, `VoidedByReceiver`, the escrow's `PaymentReclaimed`. Gate: `ClaimProven` | `docs/spec-notes.md`; `test/ChannelClose.t.sol`; `test/SoloSettlementReplay.t.sol` `test_row5_…` |
@@ -51,7 +51,7 @@ Every requirement (MUST, MUST NOT, SHOULD, MAY) in the specification files, and 
 | C:18 | 0.01 USDC per inference; 52,650 parameters | `deployments/base-sepolia-quickstart.json` (`price` 10000, six decimals); `circuits/spike-mlp/MANIFEST.md` |
 | C:24 | 11 public inputs, 320 bytes of output | `circuits/spike-mlp/MANIFEST.md`; entry `outputSize` |
 | C:67, R:158, P:169–170 | 899,361 and 841,355 gas (policy route, USDC) | `test/ProofCapturePolicyGas.t.sol`, fork suite at block 62,638,490: 148,643 + 750,718; 841,355 |
-| C:67, B:60, R:159 | 793,639 gas per claim, steady (test token) | `ProofClaimGate.t.sol` `test_gas_claim_with_proof_steady` |
+| C:67, B:60, R:159 | 793,491 gas per claim, steady (test token) | `ProofClaimGate.t.sol` `test_gas_claim_with_proof_steady` |
 | C:67, B:62, R:154 | 768,174 gas | `MEASUREMENTS.md`, `test/SoloSettlementFork.t.sol` |
 | C:82 | model, settings, SRS SHA-256; `vkHash`; `targetCodeHash`; solc 0.8.20, 1 run; 53-byte trailer | `circuits/spike-mlp/MANIFEST.md`; `scripts/verify_entry.py`; `measurements/2026-11-24-verify-entry/` |
 | C:86 | 2^13 | `circuits/spike-mlp/MANIFEST.md` (`input_scale`, `param_scale` 13) |
@@ -64,13 +64,14 @@ Every requirement (MUST, MUST NOT, SHOULD, MAY) in the specification files, and 
 | P:172 | about 4,100 gas more | 899,361 − 895,250 = 4,111 (USDC); 866,257 − 862,189 = 4,068 (test token); charge 4,354 and 4,374 |
 | P:172, R:161 | 577,544 | `test/FixtureBaseline.t.sol` |
 | B:25 | commit `d7d0a435` | `test/external/README.md` (x402 `batch-settlement`) |
-| B:27, B:78 | `version` "0"; leaf tag "v1" | `test/experimental/batch-gate/ProofClaimGate.sol` |
+| B:27, B:79 | `version` "0"; leaf tag "v1" | `test/experimental/batch-gate/ProofClaimGate.sol` |
 | B:49 | 21 tests; a fuzz test of 512 runs | `ProofClaimGate.t.sol`; `foundry.toml` (`fuzz.runs`) |
-| B:50, B:51 | four callers; seven other addresses | `test_any_caller_presenting_the_same_proof_pays_the_same_payee`; `test_a_claim_cannot_name_a_payee_other_than_the_committed_one` |
-| B:59 | 841,445 gas | `test_gas_claim_with_proof_first_claim_of_the_channel` |
-| B:62 | 24,429 gas more | 793,639 − 769,210 (`test_gas_claim_with_proof_steady` at this commit and at v0.2's merge, `fd1ce61`) |
-| B:70 | 15 minutes | `x402BatchSettlement.MIN_WITHDRAW_DELAY` |
-| B:77 | 128 and 64 bytes | Leaf preimage: four 32-byte words; node preimage: two |
+| B:50, B:51 | four callers; seven other addresses | `test_any_caller_presenting_the_same_proof_pays_the_same_payee`; `test_a_presenter_cannot_name_the_payout` |
+| B:59 | 841,297 gas | `test_gas_claim_with_proof_first_claim_of_the_channel` |
+| B:62 | 24,281 gas more | 793,491 − 769,210 (`test_gas_claim_with_proof_steady` at this commit and at v0.2's merge, `fd1ce61`) |
+| B:68 | at least 20,000 gas per stored payee | A storage write from zero to non-zero (EIP-2200 `SSTORE_SET_GAS`), before the cold-access surcharge of EIP-2929 |
+| B:71 | 15 minutes | `x402BatchSettlement.MIN_WITHDRAW_DELAY` |
+| B:78 | 128 and 64 bytes | Leaf preimage: four 32-byte words; node preimage: two |
 | R:40 | `verifyGas/63 + 5,000` | `src/ProofCheck.sol` (`CALL_MARGIN`) |
 | R:42 | lanes 1, outputSize 320, verifyGas 600,000, the hashes, id | registry `entry()` on Base Sepolia (`measurements/2026-11-24-verify-entry/ve-solo.json`); `circuits/spike-mlp/MANIFEST.md` |
 | R:74 | one storage read instead of six; 3,840 bytes | `src/ProofCheck.sol` (the entry occupies six slots; the cheap path reads `entryHash` only); `circuits/spike-mlp/MANIFEST.md` |
@@ -78,7 +79,7 @@ Every requirement (MUST, MUST NOT, SHOULD, MAY) in the specification files, and 
 | R:96 | 160 bits; 2^160; 2^80 | `src/AuthCaptureProofOperator.sol` `termsAuthorizer`; derivation in `docs/spec-notes.md` |
 | R:120, R:136 | chain id 84532 | `deployments/base-sepolia.json` |
 | R:136–146 | addresses; verifyGas 600,000 and 660,000; 766,226; 839,705; 860,315 gas | `deployments/base-sepolia.json`; `script/DeployBaseSepolia.s.sol`; `measurements/2026-11-24-testnet/README.md` |
-| R:154–159 | 768,174; 841,293; 113,661; 71,066; 895,250; 836,981; 899,361; 841,355; 793,639; 841,445 | `MEASUREMENTS.md` and the tests named there |
+| R:154–159 | 768,174; 841,293; 113,661; 71,066; 895,250; 836,981; 899,361; 841,355; 793,491; 841,297 | `MEASUREMENTS.md` and the tests named there |
 
 ## Open points for the review
 

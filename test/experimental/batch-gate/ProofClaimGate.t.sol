@@ -196,19 +196,26 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
         }
     }
 
+    /// What a presenter sends for one request: the signed leaf, and where it sits.
+    struct Request {
+        ProofClaimGate.Leaf leaf;
+        ProofClaimGate.Inclusion inc;
+    }
+
     /// `commitment` presented at `position`, with the payee and the path of the request at `pathOf`.
-    function _inclusion(uint32 position, bytes32 commitment, uint256 pathOf)
-        internal
-        view
-        returns (ProofClaimGate.Inclusion memory)
-    {
-        return ProofClaimGate.Inclusion({
-            position: position, commitment: commitment, payee: payees[pathOf], path: _path(batch, payees, pathOf)
+    function _inclusion(uint32 position, bytes32 commitment, uint256 pathOf) internal view returns (Request memory) {
+        return Request({
+            leaf: ProofClaimGate.Leaf({inputCommitment: commitment, payee: payees[pathOf]}),
+            inc: ProofClaimGate.Inclusion({position: position, path: _path(batch, payees, pathOf)})
         });
     }
 
-    function _claim(x402BatchSettlement.VoucherClaim memory vc, ProofClaimGate.Inclusion memory inc) internal {
-        gate.claimWithProof(vc, terms, _rootSig(channelId, terms, payerKey), inc, soloEntry, output, proof);
+    function _includes(bytes32 root, uint32 count, Request memory q) internal view returns (bool) {
+        return gate.includes(root, count, q.leaf, q.inc);
+    }
+
+    function _claim(x402BatchSettlement.VoucherClaim memory vc, Request memory q) internal {
+        gate.claimWithProof(vc, terms, _rootSig(channelId, terms, payerKey), q.leaf, q.inc, soloEntry, output, proof);
     }
 
     function _claimed() internal view returns (uint128 totalClaimed) {
@@ -231,10 +238,10 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
 
     function test_a_proof_presented_by_a_third_party_pays_the_committed_payee() public {
         x402BatchSettlement.VoucherClaim memory vc = _voucher(config, 2 * UNIT, UNIT);
-        ProofClaimGate.Inclusion memory inc = _inclusion(1, solo, 1);
+        Request memory inc = _inclusion(1, solo, 1);
         bytes32 digest = gate.rootDigestOf(channelId, terms);
         assertEq(digest, _rootDigest(address(gate), channelId, terms), "the gate's digest is the EIP-712 one");
-        assertEq(gate.leafHash(1, solo, payee), _leaf(1, solo, payee), "the gate's leaf");
+        assertEq(gate.leafHash(1, ProofClaimGate.Leaf(solo, payee)), _leaf(1, solo, payee), "the gate's leaf");
 
         vm.expectEmit(address(gate));
         emit ProofClaimGate.ClaimProven(channelId, digest, 1, solo, payee, output);
@@ -265,12 +272,14 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
 
     // ── (b) A claim cannot send the unit anywhere else ──────────────────────────────────────────
 
-    function test_a_claim_cannot_name_a_payee_other_than_the_committed_one() public {
+    /// The claim has no payout argument; the only payee in it is the signed leaf's. A presenter who
+    /// alters that payee presents a leaf the payer did not sign.
+    function test_a_presenter_cannot_name_the_payout() public {
         x402BatchSettlement.VoucherClaim memory vc = _voucher(config, 2 * UNIT, UNIT);
         address[7] memory others = [stranger, payer, payee0, payee2, address(gate), address(settlement), address(0)];
         for (uint256 i = 0; i < others.length; i++) {
-            ProofClaimGate.Inclusion memory inc = _inclusion(1, solo, 1);
-            inc.payee = others[i];
+            Request memory inc = _inclusion(1, solo, 1);
+            inc.leaf.payee = others[i];
             vm.prank(others[i] == address(0) ? stranger : others[i]);
             vm.expectRevert(ProofClaimGate.InclusionInvalid.selector);
             _claim(vc, inc);
@@ -279,12 +288,12 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
         assertEq(token.balanceOf(payee), 0, "nothing paid");
     }
 
-    function testFuzz_no_other_payee_opens_the_committed_request(address other) public view {
+    function testFuzz_a_presenter_cannot_name_the_payout(address other) public view {
         vm.assume(other != payee);
-        ProofClaimGate.Inclusion memory inc = _inclusion(1, solo, 1);
-        assertTrue(gate.includes(terms.root, terms.count, inc), "the committed payee opens it");
-        inc.payee = other;
-        assertFalse(gate.includes(terms.root, terms.count, inc), "no other payee does");
+        Request memory inc = _inclusion(1, solo, 1);
+        assertTrue(gate.includes(terms.root, terms.count, inc.leaf, inc.inc), "the committed payee opens it");
+        inc.leaf.payee = other;
+        assertFalse(gate.includes(terms.root, terms.count, inc.leaf, inc.inc), "no other payee does");
     }
 
     /// Two requests with the same commitment, for two payees. A claim that moved less than one unit
@@ -299,14 +308,14 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
         // Under-claiming the first request: refused, so its unit cannot move to the second.
         x402BatchSettlement.VoucherClaim memory none = _voucher(config, 2 * UNIT, 0);
         x402BatchSettlement.VoucherClaim memory half = _voucher(config, 2 * UNIT, UNIT / 2);
-        ProofClaimGate.Inclusion memory first = _inclusion(0, solo, 0);
+        Request memory first = _inclusion(0, solo, 0);
         bytes memory sig = _rootSig(channelId, terms, payerKey);
         vm.prank(stranger);
         vm.expectRevert(abi.encodeWithSelector(ProofClaimGate.ClaimNotOneUnit.selector, 0, UNIT));
-        gate.claimWithProof(none, terms, sig, first, soloEntry, output, proof);
+        gate.claimWithProof(none, terms, sig, first.leaf, first.inc, soloEntry, output, proof);
         vm.prank(stranger);
         vm.expectRevert(abi.encodeWithSelector(ProofClaimGate.ClaimNotOneUnit.selector, UNIT / 2, UNIT));
-        gate.claimWithProof(half, terms, sig, first, soloEntry, output, proof);
+        gate.claimWithProof(half, terms, sig, first.leaf, first.inc, soloEntry, output, proof);
 
         vm.prank(stranger);
         _claim(_voucher(config, 2 * UNIT, UNIT), _inclusion(0, solo, 0));
@@ -329,10 +338,10 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
         _request(solo, payee2);
         _signTerms(2 * UNIT); // overstated: the ceiling alone would let one proof take two units
         x402BatchSettlement.VoucherClaim memory two = _voucher(config, 3 * UNIT, 3 * UNIT);
-        ProofClaimGate.Inclusion memory inc = _inclusion(0, solo, 0);
+        Request memory inc = _inclusion(0, solo, 0);
         bytes memory sig = _rootSig(channelId, terms, payerKey);
         vm.expectRevert(abi.encodeWithSelector(ProofClaimGate.ClaimNotOneUnit.selector, 3 * UNIT, 2 * UNIT));
-        gate.claimWithProof(two, terms, sig, inc, soloEntry, output, proof);
+        gate.claimWithProof(two, terms, sig, inc.leaf, inc.inc, soloEntry, output, proof);
         assertEq(token.balanceOf(payee0), 0, "nothing paid");
         assertEq(_claimed(), UNIT, "nothing more claimed");
     }
@@ -354,10 +363,10 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
         vm.expectRevert(abi.encodeWithSelector(ProofClaimGate.PositionOutOfRange.selector, 3, 3));
         _claim(vc, _inclusion(3, bytes32(0), 1));
         // A path one level short.
-        ProofClaimGate.Inclusion memory shortPath = _inclusion(1, solo, 1);
+        Request memory shortPath = _inclusion(1, solo, 1);
         bytes32[] memory p = new bytes32[](1);
-        p[0] = shortPath.path[0];
-        shortPath.path = p;
+        p[0] = shortPath.inc.path[0];
+        shortPath.inc.path = p;
         vm.expectRevert(ProofClaimGate.InclusionInvalid.selector);
         _claim(vc, shortPath);
         assertEq(_claimed(), 0, "nothing claimed");
@@ -375,10 +384,10 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
 
     function test_an_invalid_proof_is_refused_and_the_position_stays_open() public {
         x402BatchSettlement.VoucherClaim memory vc = _voucher(config, 2 * UNIT, UNIT);
-        ProofClaimGate.Inclusion memory inc = _inclusion(1, solo, 1);
+        Request memory inc = _inclusion(1, solo, 1);
         bytes memory sig = _rootSig(channelId, terms, payerKey);
         vm.expectRevert(ProofClaimGate.ProofInvalid.selector);
-        gate.claimWithProof(vc, terms, sig, inc, soloEntry, output, _flip(proof, 100));
+        gate.claimWithProof(vc, terms, sig, inc.leaf, inc.inc, soloEntry, output, _flip(proof, 100));
         assertFalse(gate.proven(gate.rootDigestOf(channelId, terms), 1), "still open");
         _claim(vc, inc);
         assertEq(_claimed(), UNIT, "then the valid proof claims");
@@ -386,7 +395,7 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
 
     function test_a_check_that_cannot_run_is_unavailable_not_invalid() public {
         x402BatchSettlement.VoucherClaim memory vc = _voucher(config, 2 * UNIT, UNIT);
-        ProofClaimGate.Inclusion memory inc = _inclusion(1, solo, 1);
+        Request memory inc = _inclusion(1, solo, 1);
         vm.etch(SOLO, FixturesK8.verifierBytecode());
         vm.expectRevert(abi.encodeWithSelector(ProofClaimGate.VerifierUnavailable.selector, soloId));
         _claim(vc, inc);
@@ -395,7 +404,7 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
         e.verifyGas += 1;
         bytes memory sig = _rootSig(channelId, terms, payerKey);
         vm.expectRevert(abi.encodeWithSelector(ProofClaimGate.VerifierUnavailable.selector, soloId));
-        gate.claimWithProof(vc, terms, sig, inc, e, output, _flip(proof, 100));
+        gate.claimWithProof(vc, terms, sig, inc.leaf, inc.inc, e, output, _flip(proof, 100));
         assertEq(_claimed(), 0, "nothing claimed");
     }
 
@@ -403,18 +412,18 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
 
     function test_a_root_the_payer_did_not_sign_is_refused() public {
         x402BatchSettlement.VoucherClaim memory vc = _voucher(config, 2 * UNIT, UNIT);
-        ProofClaimGate.Inclusion memory inc = _inclusion(1, solo, 1);
+        Request memory inc = _inclusion(1, solo, 1);
         (, uint256 otherKey) = makeAddrAndKey("not the payer");
         bytes memory byOther = _rootSig(channelId, terms, otherKey);
         vm.expectRevert(ProofClaimGate.RootSignatureInvalid.selector);
-        gate.claimWithProof(vc, terms, byOther, inc, soloEntry, output, proof);
+        gate.claimWithProof(vc, terms, byOther, inc.leaf, inc.inc, soloEntry, output, proof);
 
         // Signed terms, altered after signing: a higher price.
         bytes memory sig = _rootSig(channelId, terms, payerKey);
         ProofClaimGate.RootTerms memory dearer = terms;
         dearer.unitPrice = 2 * UNIT;
         vm.expectRevert(ProofClaimGate.RootSignatureInvalid.selector);
-        gate.claimWithProof(vc, dearer, sig, inc, soloEntry, output, proof);
+        gate.claimWithProof(vc, dearer, sig, inc.leaf, inc.inc, soloEntry, output, proof);
     }
 
     function test_a_root_signed_for_one_channel_does_not_open_another() public {
@@ -424,7 +433,9 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
         bytes memory sigForFirst = _rootSig(channelId, terms, payerKey);
         x402BatchSettlement.VoucherClaim memory vc = _voucher(other, 2 * UNIT, UNIT);
         vm.expectRevert(ProofClaimGate.RootSignatureInvalid.selector);
-        gate.claimWithProof(vc, terms, sigForFirst, _inclusion(1, solo, 1), soloEntry, output, proof);
+        gate.claimWithProof(
+            vc, terms, sigForFirst, _inclusion(1, solo, 1).leaf, _inclusion(1, solo, 1).inc, soloEntry, output, proof
+        );
     }
 
     function test_a_root_signed_for_another_gate_does_not_open_this_one() public {
@@ -432,7 +443,9 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
         bytes memory sigForOther = _signDigest(payerKey, _rootDigest(address(otherGate), channelId, terms));
         x402BatchSettlement.VoucherClaim memory vc = _voucher(config, 2 * UNIT, UNIT);
         vm.expectRevert(ProofClaimGate.RootSignatureInvalid.selector);
-        gate.claimWithProof(vc, terms, sigForOther, _inclusion(1, solo, 1), soloEntry, output, proof);
+        gate.claimWithProof(
+            vc, terms, sigForOther, _inclusion(1, solo, 1).leaf, _inclusion(1, solo, 1).inc, soloEntry, output, proof
+        );
     }
 
     // ── How much a proof unlocks ────────────────────────────────────────────────────────────────
@@ -501,7 +514,9 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
         x402BatchSettlement.VoucherClaim memory vc = _voucher(leaky, 2 * UNIT, UNIT);
         bytes memory sig = _rootSig(leakyId, terms, payerKey);
         vm.expectRevert(ProofClaimGate.NotThisGate.selector);
-        gate.claimWithProof(vc, terms, sig, _inclusion(1, solo, 1), soloEntry, output, proof);
+        gate.claimWithProof(
+            vc, terms, sig, _inclusion(1, solo, 1).leaf, _inclusion(1, solo, 1).inc, soloEntry, output, proof
+        );
 
         // Why: x402BatchSettlement admits both the receiver and the receiver authorizer.
         x402BatchSettlement.VoucherClaim[] memory claims = new x402BatchSettlement.VoucherClaim[](1);
@@ -523,11 +538,11 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
             }
             bytes32 root = _root(batch, payees);
             for (uint256 i = 0; i < n; i++) {
-                assertTrue(gate.includes(root, uint32(n), _inclusion(uint32(i), batch[i], i)), "own position");
+                assertTrue(_includes(root, uint32(n), _inclusion(uint32(i), batch[i], i)), "own position");
                 if (n > 1) {
                     uint256 j = (i + 1) % n;
-                    assertFalse(gate.includes(root, uint32(n), _inclusion(uint32(j), batch[i], i)), "other position");
-                    assertFalse(gate.includes(root, uint32(n), _inclusion(uint32(i), batch[j], i)), "other commitment");
+                    assertFalse(_includes(root, uint32(n), _inclusion(uint32(j), batch[i], i)), "other position");
+                    assertFalse(_includes(root, uint32(n), _inclusion(uint32(i), batch[j], i)), "other commitment");
                 }
             }
         }
@@ -542,7 +557,8 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
                 _voucher(config, 2 * UNIT, UNIT),
                 terms,
                 _rootSig(channelId, terms, payerKey),
-                _inclusion(1, solo, 1),
+                _inclusion(1, solo, 1).leaf,
+                _inclusion(1, solo, 1).inc,
                 soloEntry,
                 output,
                 proof
@@ -554,7 +570,7 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
         TxGas memory g = _measure(stranger, address(gate), data, cold);
         _log("ProofClaimGate.claimWithProof, the channel's first claim", g);
         assertEq(_claimed(), UNIT, "the measured call claimed");
-        assertLe(g.total, 841_800, "pin: measured 841,445");
+        assertLe(g.total, 841_700, "pin: measured 841,297");
     }
 
     /// The channel's second claim, from a second signed batch: the channel's and the receiver's
@@ -572,7 +588,8 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
                 _voucher(config, 2 * UNIT, 2 * UNIT),
                 terms,
                 _rootSig(channelId, terms, payerKey),
-                _inclusion(0, solo, 0),
+                _inclusion(0, solo, 0).leaf,
+                _inclusion(0, solo, 0).inc,
                 soloEntry,
                 output,
                 proof
@@ -584,6 +601,6 @@ contract ProofClaimGateTest is ProofCoreBase, GasMeter {
         TxGas memory g = _measure(stranger, address(gate), data, cold);
         _log("ProofClaimGate.claimWithProof, steady", g);
         assertEq(_claimed(), 2 * UNIT, "the measured call claimed");
-        assertLe(g.total, 794_000, "pin: measured 793,639");
+        assertLe(g.total, 793_900, "pin: measured 793,491");
     }
 }

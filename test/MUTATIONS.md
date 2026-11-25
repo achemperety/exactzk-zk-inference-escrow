@@ -860,3 +860,29 @@ Notes:
 - BP5 (the gate's leaf ignores the payee) is not caught by `test_a_claim_cannot_name_a_payee_other_than_the_committed_one` on its own: with the gate and the client disagreeing on the leaf, every presented payee fails inclusion, the committed one included. The fuzz test catches it, because it requires the committed payee to open the leaf as well as every other address not to.
 - BP7 (no one-unit rule, still forwarding one unit): the under-claim fails with the token's `ERC20InsufficientBalance` instead of `ClaimNotOneUnit`, since the gate tries to pay a unit it did not receive; the over-claim goes through, and the gate keeps the second unit. BP6, which forwards what the claim moved, lets both through: the under-claim pays the first payee nothing, and the over-claim pays one payee two units.
 - BP12 repeats G18 against the new gate.
+
+## The gate takes the signed leaf; a presenter cannot name the payout
+
+Run on 2026-11-25. `claimWithProof` now takes the request as the payer signed it, one struct `Leaf{inputCommitment, payee}`, next to `Inclusion{position, path}`, and pays `leaf.payee`. The claim has no payout argument. The leaf's hash is the same bytes as before, so signed roots are unchanged. The two tests that alter the payee are renamed `test_a_presenter_cannot_name_the_payout` and `testFuzz_a_presenter_cannot_name_the_payout`. Still 21 tests.
+
+15 mutations on `test/experimental/batch-gate/ProofClaimGate.sol`, run as the section above and restored byte for byte. LP1–LP4 and LP9–LP15 repeat BP1–BP12 against the new interface; LP5–LP8 are about the leaf struct. All were caught.
+
+| Id | Deliberate breakage | Tests that failed |
+|---|---|---|
+| LP1 | the unit goes to the caller, not leaf.payee | 5: `test_a_claim_cannot_shift_a_unit_from_one_payee_to_another`, `test_a_proof_presented_by_a_third_party_pays_the_committed_payee`, `test_any_caller_presenting_the_same_proof_pays_the_same_payee`, `test_base_claimed_carries_earlier_batches`, `test_gas_claim_with_proof_steady` |
+| LP2 | only the leaf's payee may present the proof | 18, among them `test_a_claim_cannot_shift_a_unit_from_one_payee_to_another`, `test_a_claim_cannot_take_more_than_one_unit_for_its_payee`, `test_a_presenter_cannot_name_the_payout`, `test_a_proof_presented_by_a_third_party_pays_the_committed_payee`, `test_any_caller_presenting_the_same_proof_pays_the_same_payee`, `test_one_proof_claims_one_unit_and_a_position_counts_once` |
+| LP3 | nothing forwarded: the unit stays with the gate | 4: `test_a_claim_cannot_shift_a_unit_from_one_payee_to_another`, `test_a_proof_presented_by_a_third_party_pays_the_committed_payee`, `test_any_caller_presenting_the_same_proof_pays_the_same_payee`, `test_base_claimed_carries_earlier_batches` |
+| LP4 | the event names the caller as the payee | 1: `test_a_proof_presented_by_a_third_party_pays_the_committed_payee` |
+| LP5 | the leaf hash does not bind the payee | 13, among them `testFuzz_a_presenter_cannot_name_the_payout`, `test_a_claim_cannot_shift_a_unit_from_one_payee_to_another`, `test_a_claim_cannot_take_more_than_one_unit_for_its_payee`, `test_a_proof_presented_by_a_third_party_pays_the_committed_payee`, `test_any_caller_presenting_the_same_proof_pays_the_same_payee`, `test_one_proof_claims_one_unit_and_a_position_counts_once` |
+| LP6 | the leaf hashed with its fields in the other order | 13, among them `testFuzz_a_presenter_cannot_name_the_payout`, `test_a_claim_cannot_shift_a_unit_from_one_payee_to_another`, `test_a_claim_cannot_take_more_than_one_unit_for_its_payee`, `test_a_proof_presented_by_a_third_party_pays_the_committed_payee`, `test_any_caller_presenting_the_same_proof_pays_the_same_payee`, `test_one_proof_claims_one_unit_and_a_position_counts_once` |
+| LP7 | the leaf hashed packed (52 bytes for the leaf instead of 64) | 13, among them `testFuzz_a_presenter_cannot_name_the_payout`, `test_a_claim_cannot_shift_a_unit_from_one_payee_to_another`, `test_a_claim_cannot_take_more_than_one_unit_for_its_payee`, `test_a_proof_presented_by_a_third_party_pays_the_committed_payee`, `test_any_caller_presenting_the_same_proof_pays_the_same_payee`, `test_one_proof_claims_one_unit_and_a_position_counts_once` |
+| LP8 | the proof checked against a commitment other than the leaf's | 9, among them `test_a_claim_cannot_shift_a_unit_from_one_payee_to_another`, `test_a_claim_cannot_take_more_than_one_unit_for_its_payee`, `test_a_proof_presented_by_a_third_party_pays_the_committed_payee`, `test_any_caller_presenting_the_same_proof_pays_the_same_payee`, `test_one_proof_claims_one_unit_and_a_position_counts_once` |
+| LP9 | no one-unit rule; forward what the claim moved | 2: `test_a_claim_cannot_shift_a_unit_from_one_payee_to_another`, `test_a_claim_cannot_take_more_than_one_unit_for_its_payee` |
+| LP10 | no one-unit rule; forward one unit | 2: `test_a_claim_cannot_shift_a_unit_from_one_payee_to_another`, `test_a_claim_cannot_take_more_than_one_unit_for_its_payee` |
+| LP11 | one-unit rule only bounds from above | 1: `test_a_claim_cannot_shift_a_unit_from_one_payee_to_another` |
+| LP12 | one-unit rule only bounds from below | 1: `test_a_claim_cannot_take_more_than_one_unit_for_its_payee` |
+| LP13 | receiver not required to be the gate | 1: `test_a_channel_whose_receiver_is_not_the_gate_is_refused` |
+| LP14 | receiver authorizer not required to be the gate | 1: `test_a_channel_whose_receiver_authorizer_is_not_the_gate_is_refused` |
+| LP15 | gate answers ERC-1271 for any signature | 1: `test_without_the_gate_nobody_claims_or_signs_for_its_channel` |
+
+As with BP5, LP5–LP7 make the gate and the signer disagree on every leaf, so `test_a_presenter_cannot_name_the_payout` passes on its own (every payee is refused, the committed one included); `testFuzz_a_presenter_cannot_name_the_payout`, which also requires the committed payee to open the leaf, fails on each.

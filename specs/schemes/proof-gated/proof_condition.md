@@ -64,7 +64,7 @@ Example of properties 3, 4 and 5 together: a third party submits a tampered proo
 | What the client signs that binds the terms | `PaymentInfo.salt`, through a salt nonce derived from the terms | A root over the batch's input commitments and payees | The terms, as the payment's id |
 | Client | Must derive the salt nonce from the terms | Must sign the root | Proof-aware client |
 | Runs today | Through a `"custom"` operator fixed to the policy | As a prototype, locally | Deployed on a testnet |
-| Measured (local; [details](./reference_evm.md#gas-baseline)) | 899,361 gas for `authorize` + capture, 841,355 for a charge (USDC) | 793,639 gas per claim, steady, payee paid in the claim (test token) | 768,174 for one-transaction `settle` (USDC) |
+| Measured (local; [details](./reference_evm.md#gas-baseline)) | 899,361 gas for `authorize` + capture, 841,355 for a charge (USDC) | 793,491 gas per claim, steady, payee paid in the claim (test token) | 768,174 for one-transaction `settle` (USDC) |
 
 ## Model identity
 
