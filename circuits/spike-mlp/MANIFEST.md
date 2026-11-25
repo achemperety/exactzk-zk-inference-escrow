@@ -118,6 +118,7 @@ Skipping step 2 or 3 leaves a verifier that deploys, has the right interface and
 | `export_model.py` | Export the model to ONNX | PyTorch |
 | `run_pipeline.py`, `task3_benchmark.py` | Earlier end-to-end EZKL runs and proving benchmarks | EZKL, several GB of memory |
 | `setup_test_fixtures.py` | Rebuild `test/fixtures/Fixtures.sol` from `run_t3_k5_nonces/proof.json` and a freshly deployed verifier | EZKL, Anvil, `srs.bin` |
+| `../../scripts/reference_case.py` | Recompute the input commitment and the output of `run_t3_k5_nonces/input.json` by witness generation, and compare them with the stored proof's | EZKL |
 | `test_verifier_bytecode_repro.py`, `test_batch_verifier_bytecode_repro.py` | Regenerate each verifier and compare stripped bytecode hashes | EZKL, Anvil |
 | `test_fixtures_bytecode_freshness.py` | Check that the fixtures embed the verifier the pinned key produces | EZKL, Anvil |
 | `passport_attest.py` | The two bytecode-hash helpers the scripts above import | |

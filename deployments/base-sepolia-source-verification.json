@@ -1,0 +1,20 @@
+{
+  "network": "Base Sepolia",
+  "chainId": 84532,
+  "checked": "2026-11-25",
+  "contracts": {
+    "ProofEvaluator8183": {
+      "address": "0x92B1Ff082EaDCda56eE82408695429820687de39",
+      "sourcify": {
+        "match": "match",
+        "creationMatch": "match",
+        "runtimeMatch": "match",
+        "verifiedAt": "2026-11-24T18:23:45Z",
+        "compiler": "solc 0.8.28+commit.7893614a, via IR, optimizer 1,000,000 runs, evmVersion prague, no CBOR metadata",
+        "lookup": "https://sourcify.dev/server/v2/contract/84532/0x92B1Ff082EaDCda56eE82408695429820687de39"
+      },
+      "sourcesAgainstThisRepository": "all 14 equal to tag v3.0.0-testnet; at main fd1ce61, 13 equal and src/ProofCheck.sol differs by checkOneInMemory, which the evaluator does not use",
+      "runtimeAgainstThisRepository": "the main build equals the on-chain runtime code outside its 2 immutable slots, which hold the registry address"
+    }
+  }
+}

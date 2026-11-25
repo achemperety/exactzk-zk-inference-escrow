@@ -51,6 +51,14 @@ python3 scripts/verify_entry.py solo
 
 From the model file, the pinned `settings.json` and the SRS (each checked against its SHA-256), this regenerates the verifying key and the verifier, compiles it with solc 0.8.20, and compares the result with the registry entry on Base Sepolia: key hash, code hash, code without its metadata trailer, and the entry's id. It only reads the chain. It needs Python and EZKL 23.0.5. On 2 vCPUs of an Intel Xeon Gold 5220R the solo entry matched in 21.7 s at 996 MB peak, most of it the key setup; `--from-vk` starts from the published key, needs no model weights, and took 3.6 s (solo) and 8.1 s (K=8). The K=8 key setup needs about 6.4 GB and was not run there ([measurements/2026-11-24-verify-entry/](measurements/2026-11-24-verify-entry/README.md)).
 
+### Recompute the reference input's commitment and output
+
+```
+python3 scripts/reference_case.py
+```
+
+From the published solo input (`circuits/spike-mlp/run_t3_k5_nonces/input.json`), the model files and the pinned `settings.json` (each checked against its SHA-256), EZKL's witness generation gives the input commitment and the ten outputs the circuit computes for that input, without proving. The script compares them with the stored proof's and prints the solo entry's verifier id. It needs EZKL 23.0.5, no SRS, about 75 MB and under a second.
+
 ## Numbers
 
 Gas under the Osaka schedule. "Testnet" figures are Base Sepolia receipts; "local" figures are `forge test` with the method in [MEASUREMENTS.md](MEASUREMENTS.md), which also has the previous version's figures, the first-time rows and the breakdowns.
@@ -65,7 +73,7 @@ Gas under the Osaka schedule. "Testnet" figures are Base Sepolia receipts; "loca
 | K=16 batch, sixteen channels, steady, real proof | 1,137,050 gas, 71,066 per request (previous version: 96,401) | local | `test/ChannelSettlementK16Gas.t.sol` |
 | x402 `auth-capture`: `authorize` + `captureWithProof`, USDC | 895,250 gas | local | `test/AuthCaptureGas.t.sol` |
 | x402 `auth-capture`, proof policy: `authorize` + `captureWithPolicy`, USDC | 899,361 gas | local | `test/ProofCapturePolicyGas.t.sol` |
-| x402 `batch-settlement` claim gate (prototype): one claim, steady | 769,210 gas | local | `test/experimental/batch-gate/ProofClaimGate.t.sol` |
+| x402 `batch-settlement` claim gate (prototype): one claim, steady, payee paid in the claim | 793,491 gas | local, test token | `test/experimental/batch-gate/ProofClaimGate.t.sol` |
 | ERC-8183 `evaluate`, test token, steady | 769,085 gas | local | `test/StandardsGas.t.sol` |
 | Of a solo settlement: the generated verifier | 577,544 gas | local | `test/FixtureBaseline.t.sol` |
 | Solo proof, canonical keys | 20.10 s, 1,393 MB | 2 vCPUs of an Intel Xeon Gold 5220R | `measurements/2026-11-24-prover/` |
@@ -108,7 +116,7 @@ In plain words:
 | `docs/` | The points agreed in the x402 discussion, deployment notes, and where the ERC texts and their reference code differ |
 | `deployments/` | The Base Sepolia deployment: addresses, verifier ids, the quickstart's payee |
 | `script/` | The testnet deployment script, and the local chain state for the x402 run |
-| `scripts/` | `verify_entry.py` (above); `hygiene_scan.sh` (no address, key or endpoint enters the tree); `fetch_srs.sh` (the two reference strings, checked by hash); `deploy.sh` and `check_deployment.py`; live checks of the ERC-8004 registries and x402's escrow against their pinned source |
+| `scripts/` | `verify_entry.py` and `reference_case.py` (above); `hygiene_scan.sh` (no address, key or endpoint enters the tree); `fetch_srs.sh` (the two reference strings, checked by hash); `deploy.sh` and `check_deployment.py`; live checks of the ERC-8004 registries and x402's escrow against their pinned source |
 | `lib/` | Pinned submodules: forge-std, OpenZeppelin Contracts v5.7.0, and, for tests only, the ERC-8004 reference registries with OpenZeppelin v5.4.0, and x402's `auth-capture` escrow (base/commerce-payments v1.1.0) |
 
 ## How a channel closes
