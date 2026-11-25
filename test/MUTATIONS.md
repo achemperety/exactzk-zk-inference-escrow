@@ -822,3 +822,17 @@ Run on 2026-11-25. The middleware (`clients/python`), the x402 server (`x402/ser
 | CL3 | client: v3.0.0-testnet's names in its revert map | **not caught by `clients/e2e/run.sh`** (the map is used only when the client settles directly); after `reasons.test.ts` was added, 3: "an invalid proof is reported with the specification's name", "an uncheckable proof is reported with the specification's name, never as invalid", "the revert is found inside a wrapping error" |
 | CL4 | client: an uncheckable proof mapped to the invalid-proof reason | 1: "an uncheckable proof is reported with the specification's name, never as invalid" |
 | CL5 | client: any `Error`, not only a viem error, is searched for a revert | 1: "something that is not a revert has no reason" |
+
+## The reference case (`scripts/reference_case.py`)
+
+Run on 2026-11-25 on the Mac, EZKL 23.0.5. Unmutated, the script exits 0: the commitment and all ten outputs equal the stored proof's. Each mutated file was restored byte for byte afterwards. The script is not run in CI, which does not install EZKL.
+
+| Id | Deliberate breakage | What happened |
+|---|---|---|
+| RC1 | one feature of `input.json` changed by 0.5 | exit 1 at the SHA-256 check of `input.json` |
+| RC2 | the same, with the SHA-256 check skipped | exit 1: the input commitment and the output both differ |
+| RC3 | the last nonce value changed by 1, the SHA-256 check skipped | exit 1: the input commitment differs; the output does not, since the network ignores the nonces |
+| RC4 | field elements read big-endian | exit 1: the commitment and the output differ |
+| RC5 | the output not compared | **exit 0 on the published files**: no case above changes the output alone |
+| RC6 | the published output's first value changed, 656 to 657 (`clients/ts/published/solo-proof.json`) | exit 1 at the output; with RC5 applied as well, exit 0, so RC6 is the case that catches RC5 |
+
