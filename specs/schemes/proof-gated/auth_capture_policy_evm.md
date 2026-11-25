@@ -58,7 +58,7 @@ A status is a short ASCII name, left-aligned in 32 bytes. The zero word is none 
 These are the only words and reasons. A policy or an operator MUST NOT define reasons of its own.
 
 - A policy MUST answer with a status for every outcome it can name, and MUST NOT revert to express one.
-- A policy MUST answer `"ProofInvalid"` only in the case the table names. "Could not be checked" MUST NOT degrade into `"ProofInvalid"` by default: an unknown entry, an entry that is not the registered one, code that is not the registered code, and any failure the policy cannot classify MUST NOT be answered `"ProofInvalid"`.
+- A policy MUST answer `"ProofInvalid"` only in the case the table names. "Could not be checked" MUST NOT degrade into `"ProofInvalid"` by default ([core property 1](./proof_condition.md#core-properties)): an unknown entry, an entry that is not the registered one, code that is not the registered code, and any failure the policy cannot classify MUST NOT be answered `"ProofInvalid"`.
 - An operator MUST consult the check after its own unconditional checks, as the appendix orders them. On any status but `"Authorized"` it MUST revert with `PolicyRefused(bytes32 status)`, passing the word on unchanged.
 - A facilitator MUST map a `PolicyRefused` word through this table. It MUST NOT map an unknown word, an unrecognised revert, or a revert with no data to `invalid_auth_capture_evm_proof_invalid`.
 
@@ -75,7 +75,7 @@ Neither proof failure ends the authorization; both refuse only this attempt. A h
 
 Example: a hold of 1 USDC with a capture deadline one hour away. A capture with a tampered proof reverts with `ProofInvalid`. A capture while the verifier's code differs from the registered code reverts with `VerifierUnavailable`. One second before the deadline, the valid proof captures the whole hold. From the deadline on, no proof captures and the payer reclaims.
 
-A transaction that cannot give the verifier its gas allowance reverts with `InsufficientGasForVerifier(uint256 required, uint256 available)` before any status is formed ([proof_condition.md](./proof_condition.md#core-properties), property 7). That is not a refusal. A facilitator MUST raise its gas limit and MUST NOT report the proof invalid.
+A transaction that cannot give the verifier its gas allowance reverts with `InsufficientGasForVerifier(uint256 required, uint256 available)` before any status is formed ([proof_condition.md](./proof_condition.md#core-properties), property 8). That is not a refusal. A facilitator MUST raise its gas limit and MUST NOT report the proof invalid.
 
 ## The proof policy
 
@@ -91,8 +91,8 @@ SALT_BINDING_TYPEHASH = keccak256("x402AuthCaptureSaltBinding(address receiverAu
 ```
 
 - **Why the salt nonce.** Under `"policy"` the receiver authorizer signs every capture on chain, so it cannot be an address derived from the terms that nobody holds a key for, as in the [binding for an unmodified client](./reference_evm.md#the-terms-authorizer-binding). The salt nonce is the one input left that the client controls.
-- **Uniqueness.** The input commitment already carries the client's fresh randomness ([property 9](./proof_condition.md#core-properties)), so the salt nonce is unique per payment without a further random value.
-- **Strength.** The terms are bound by the full 256-bit hash, not by an address truncated to 160 bits. If the client draws its randomness after the server named the verifier (property 9), capturing with other terms needs a second preimage: about 2^256 hash evaluations. A server that saw the commitment before naming the verifier could vary both sides and search for any collision: about 2^128. Both figures assume keccak256 behaves as a random function.
+- **Uniqueness.** The input commitment already carries the client's fresh randomness ([property 10](./proof_condition.md#core-properties)), so the salt nonce is unique per payment without a further random value.
+- **Strength.** The terms are bound by the full 256-bit hash, not by an address truncated to 160 bits. If the client draws its randomness after the server named the verifier (property 10), capturing with other terms needs a second preimage: about 2^256 hash evaluations. A server that saw the commitment before naming the verifier could vary both sides and search for any collision: about 2^128. Both figures assume keccak256 behaves as a random function.
 - **Clients.** A client MUST derive the salt nonce from the terms it means to pay for. x402's own client draws it at random today. Such a payment opens to no terms, so every attempt answers `"Denied"` and the payer reclaims after the deadline. A server MUST check the binding before it runs the resource and refuse a payment whose salt nonce is not derived from the terms it offered.
 
 The requirement adds `extra.verifierId`, `extra.inputCommitment` and `extra.inputCommitmentFormat` to an `auth-capture` requirement; clients ignore `extra` keys they do not know. `inputCommitmentFormat` names how the client computes the commitment. The reference circuits use `ezkl/poseidon/hashed-public/v1`: EZKL's Poseidon hash over the quantised input followed by the circuit's nonce elements. Before signing, a client MUST check that `extra.inputCommitment` is the commitment it computed, and that `extra.verifierId` is the verifier first offered and stands for the circuit it wants ([reference_evm.md](./reference_evm.md#before-signing)).

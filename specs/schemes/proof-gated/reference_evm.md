@@ -73,7 +73,7 @@ TYPEHASH  = keccak256("ProofGatedPayment(uint256 chainId,address settlement,addr
 
 `entry` is the registered entry, passed whole so the contract authenticates it with one storage read instead of six. The proof for the reference circuits is 3,840 bytes.
 
-`ChannelSettlement` applies the condition to prepaid channels: a voucher per request, `Voucher(bytes32 channelId,uint48 seq,uint96 amount,uint96 cumAmount,bytes32 inputCommitment,uint40 proveBy)`, and `settleBatch` with one proof for up to K vouchers. `BatchSettled` carries one result per lane only after the proof verified ([property 6](./proof_condition.md#core-properties)). A channel's windows have floors: prove window ≥ 60 s, challenge window ≥ 300 s. Clients SHOULD default to 10 minutes and 24 hours, long enough to fill and prove a batch, and to answer a close request through an outage.
+`ChannelSettlement` applies the condition to prepaid channels: a voucher per request, `Voucher(bytes32 channelId,uint48 seq,uint96 amount,uint96 cumAmount,bytes32 inputCommitment,uint40 proveBy)`, and `settleBatch` with one proof for up to K vouchers. `BatchSettled` carries one result per lane only after the proof verified ([property 7](./proof_condition.md#core-properties)). A channel's windows have floors: prove window ≥ 60 s, challenge window ≥ 300 s. Clients SHOULD default to 10 minutes and 24 hours, long enough to fill and prove a batch, and to answer a close request through an outage.
 
 ### Before signing
 
@@ -156,7 +156,7 @@ Local, Osaka schedule, real proofs, every account cold, steady unless marked. US
 | Native, channel: per request in a K=8 batch; K=16 | 113,661; 71,066 |
 | `auth-capture`, terms-authorizer operator: `authorize` + `captureWithProof`; `chargeWithProof`, USDC | 895,250; 836,981 |
 | `auth-capture`, proof policy: `authorize` + `captureWithPolicy`; `chargeWithPolicy`, USDC | 899,361; 841,355 |
-| `batch-settlement` gate (prototype): one claim, steady; the channel's first claim | 769,210; 797,428 |
+| `batch-settlement` gate (prototype): one claim, steady; the channel's first claim; test token, payee paid in the claim | 793,491; 841,297 |
 
 Of each solo-proof row, 577,544 is the generated verifier.
 

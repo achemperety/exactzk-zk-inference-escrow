@@ -65,7 +65,7 @@ Gas under the Osaka schedule. "Testnet" figures are Base Sepolia receipts; "loca
 | K=16 batch, sixteen channels, steady, real proof | 1,137,050 gas, 71,066 per request (previous version: 96,401) | local | `test/ChannelSettlementK16Gas.t.sol` |
 | x402 `auth-capture`: `authorize` + `captureWithProof`, USDC | 895,250 gas | local | `test/AuthCaptureGas.t.sol` |
 | x402 `auth-capture`, proof policy: `authorize` + `captureWithPolicy`, USDC | 899,361 gas | local | `test/ProofCapturePolicyGas.t.sol` |
-| x402 `batch-settlement` claim gate (prototype): one claim, steady | 769,210 gas | local | `test/experimental/batch-gate/ProofClaimGate.t.sol` |
+| x402 `batch-settlement` claim gate (prototype): one claim, steady, payee paid in the claim | 793,491 gas | local, test token | `test/experimental/batch-gate/ProofClaimGate.t.sol` |
 | ERC-8183 `evaluate`, test token, steady | 769,085 gas | local | `test/StandardsGas.t.sol` |
 | Of a solo settlement: the generated verifier | 577,544 gas | local | `test/FixtureBaseline.t.sol` |
 | Solo proof, canonical keys | 20.10 s, 1,393 MB | 2 vCPUs of an Intel Xeon Gold 5220R | `measurements/2026-11-24-prover/` |
