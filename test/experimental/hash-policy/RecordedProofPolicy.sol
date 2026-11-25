@@ -6,7 +6,7 @@ import {ICapturePolicyStatus, PolicyStatus} from "../../../src/ICapturePolicySta
 import {IVerifierRegistry, VerifierEntry} from "../../../src/IVerifierRegistry.sol";
 import {ProofCheck, ProofStatus} from "../../../src/ProofCheck.sol";
 
-/// @title RecordedProofPolicy (PROTOTYPE, not for deployment)
+/// @title RecordedProofPolicy (reference for the profile's optional two-step route; unaudited, not deployed)
 /// @notice The proof policy of the `auth-capture` profile with hash-only `policyData`: the proof is
 /// checked once, in a transaction of its own, and the policy hook reads the recorded result by hash.
 ///
