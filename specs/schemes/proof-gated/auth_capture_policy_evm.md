@@ -8,6 +8,7 @@ This is a profile of the reserved `"policy"` operator type of x402's [`auth-capt
 2. The **status words** and their `errorReason` values, defined once for every policy.
 3. The **proof policy**: how the terms are bound into the payment, what the policy reads, and what each outcome does.
 4. The **route that works today**: a `"custom"` operator fixed to one policy, usable before the `"policy"` type exists.
+5. An **optional two-step route**: the proof checked and recorded in a transaction of its own, the payment opened by the record's key.
 
 The escrow, the payment's identity, the deadlines and `reclaim` are `auth-capture`'s own and are not changed. Core types are those of [x402-specification-v2.md](https://github.com/x402-foundation/x402/blob/main/specs/x402-specification-v2.md).
 
@@ -143,6 +144,71 @@ Until the `"policy"` type exists, a `"custom"` operator can consult one policy f
 
 The requirement is a standard `auth-capture` one with `operatorType: "custom"`, `captureAuthorizer` = the operator, `policy` zero, a non-zero `receiverAuthorizer` (the server's address; it signs nothing on this route) and `paymentFlow: "escrow"`. As for any `"custom"` operator, the facilitator relays only the collect call; `captureWithPolicy` and `chargeWithPolicy` are submitted out of band. The operator emits `CapturedWithPolicy(paymentInfoHash, amount, keccak256(policyData))`; the output itself is in the transaction's call data.
 
+## Optional: two steps, a recorded check
+
+The one-step route above is this profile's route. A policy MAY instead split it in two: a transaction that checks the proof and records the result, then a capture or charge whose `policyData` carries the hash of the output and the proof instead of the proof. The payer's side is unchanged: the salt binding, the requirement and the operator are those of the one-step route. Reference: `test/experimental/hash-policy/RecordedProofPolicy.sol`, through the unchanged `PolicyCaptureOperator`.
+
+### The record
+
+```solidity
+function recordCheck(bytes32 verifierId, bytes32 inputCommitment, bytes calldata output, bytes calldata proof)
+    external returns (ProofStatus);
+
+event CheckRecorded(
+    bytes32 indexed key, bytes32 indexed verifierId, bytes32 indexed inputCommitment, bool valid, bytes output
+);
+```
+
+```
+proofHash = keccak256(abi.encode(output, proof))
+key       = keccak256(abi.encode(verifierId, inputCommitment, proofHash))
+```
+
+- Wherever a record exists, it MUST be stored under this key. The policy can tie a record to a payment only through the terms the payer's salt binds, so the input commitment MUST stand in the key beside the verifier id, not only inside `proofHash`. A key without it would let a presenter open one payment with a valid record for another commitment.
+- Only `Valid` and `Invalid` MUST be recorded. A check that ends `Unverifiable` MUST store nothing, so the same proof can be presented again once it can be checked ([core property 1](./proof_condition.md#core-properties)).
+- A recorded result MUST NOT change. A call for a key already recorded returns the stored result without checking again; a registered entry's code cannot change ([property 9](./proof_condition.md#core-properties)), so a second check would give the same answer.
+- The record's event MUST carry the key and the output ([property 2](./proof_condition.md#core-properties)).
+- `recordCheck` MAY be open to anyone. It checks the proof against the registry entry as the one-step policy does, and reverts with `InsufficientGasForVerifier`, recording nothing, when it cannot give the verifier its allowance.
+
+### What the policy reads on this route
+
+```solidity
+struct HashData {
+    address receiverAuthorizer;   // as in ProofData
+    address policy;               // as in ProofData
+    bytes32 verifierId;
+    bytes32 inputCommitment;
+    bytes32 proofHash;            // keccak256(abi.encode(output, proof))
+}
+policyData = abi.encode(HashData)
+```
+
+The policy, in order:
+1. Answers `"Denied"` unless `policy` is zero or the policy's own address, and unless the salt recomputed from the first four fields equals `paymentInfo.salt`, as on the one-step route.
+2. Reads the record under the key of `verifierId`, `inputCommitment` and `proofHash`. `Valid` is `"Authorized"`, `Invalid` is `"ProofInvalid"`, and no record is `"VerifierUnavailable"`. No record MUST NOT be answered `"ProofInvalid"`: a proof that nobody has recorded yet and a proof whose verifier cannot run read the same, and neither was decided.
+
+The status words, the outcomes and the error codes are this profile's. A capture that finds no record reverts with `PolicyRefused("VerifierUnavailable")`; the server records the check and captures again.
+
+### What changes against one step
+
+- **Where the output is.** It is in `recordCheck`'s `CheckRecorded` event, not in the transaction that moves the funds. That transaction carries `verifierId`, `inputCommitment` and `proofHash`, from which the key follows ([property 2](./proof_condition.md#core-properties)).
+- **Records are shared.** A `Valid` record serves every payment bound to the same verifier and commitment with the same output and proof; the commitment's fresh randomness ([property 10](./proof_condition.md#core-properties)) keeps that to one payment. A third party can record only the true result for the exact bytes it submits: an `Invalid` record for a tampered proof has a key of its own and does not touch the real proof's.
+- **Cost.** One more transaction and one new storage slot per payment.
+
+### Gas, two steps
+
+Measured as in [Gas](#gas), steady. `recordCheck` writes a fresh record, as for a payment with its own fresh input commitment. The one-step figures are those of [Gas](#gas).
+
+| Transaction | Test token | USDC |
+|---|---:|---:|
+| `recordCheck`, a fresh record | 727,888 | 727,888 |
+| `captureWithPolicy`, `HashData` | 74,270 | 85,116 |
+| **Two steps** | **802,158** | **813,004** |
+| One step: `captureWithPolicy`, `ProofData` | 739,872 | 750,718 |
+| Difference | +62,286 | +62,286 |
+
+Most of the difference is the second transaction's 21,000 and the new slot's 22,100, cold access included; the rest is the event carrying the output, the registry entry read inside `recordCheck`, and the policy's cold storage read at capture.
+
 ## Error codes
 
 Two reasons are added to `auth-capture`'s list; the others are its own.
@@ -175,7 +241,7 @@ The reason-returning policy costs about 4,100 gas more per payment than the [ter
 
 - **Read-only.** The check is `view`: it cannot move value, re-enter the escrow or leave state. Its only cost is gas. The operator's own checks run whatever it answers.
 - **No silent downgrade.** Unknown words and unrecognised reverts map to `policy_denied` or `simulation_failed`, never to `proof_invalid`. A server that sees `proof_invalid` knows a verifier ran and said no.
-- **Griefing.** Every refusal reverts and records nothing, so a third party cannot attach a failure to someone else's hold, and the hold stays capturable.
+- **Griefing.** Every refusal reverts and records nothing, so a third party cannot attach a failure to someone else's hold, and the hold stays capturable. On the two-step route a third party can record a check, but only the true result for the bytes it submits, under those bytes' own key.
 - **Stock clients.** A client that does not derive the salt nonce from the terms cannot be captured under this policy: escrow safety only, and its hold returns to it after the deadline.
 - **What the policy does not decide.** The policy does not constrain the amount or the fee. Under `"policy"` the authorizer's signature fixes them; on the `"custom"` route the operator takes the whole hold and the payer's minimum fee.
 - The reference contracts are unaudited; see [reference_evm.md](./reference_evm.md#security-considerations).
@@ -191,3 +257,4 @@ The reason-returning policy costs about 4,100 gas more per payment than the [ter
 | Version | Date | Changes | Authors |
 |---|---|---|---|
 | v0.2 | 2026-11-25 | First draft of the profile | @achemperety |
+| v0.3 | 2026-11-25 | Optional two-step route: a recorded check, opened by its key; one step stays the profile's route | @achemperety |

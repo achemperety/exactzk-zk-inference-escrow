@@ -127,6 +127,8 @@ kw sepolia test/AuthCaptureBase.sol  # names the testnet whose chain id the test
 kw sepolia scripts/reference_case.py  # reads the solo verifier id from deployments/base-sepolia.json
 kw sepolia test/AuthCaptureGas.t.sol  # names the forked testnet; the endpoint comes from FORK_RPC_URL
 kw sepolia test/ProofCapturePolicyGas.t.sol  # names the forked testnet; the endpoint comes from FORK_RPC_URL
+kw sepolia test/experimental/hash-policy/RecordedProofPolicy.t.sol  # names the forked testnet; the endpoint comes from FORK_RPC_URL
+kw sepolia test/experimental/hash-policy/README.md  # names the forked testnet and the opt-in fork command
 kw sepolia measurements/2026-11-24-x402-auth-capture/README.md  # names the testnet whose USDC was measured on a fork
 kw sepolia script/DeployBaseSepolia.s.sol  # the deployment script for the testnet; the endpoint is passed on the command line
 kw sepolia scripts/deploy.sh  # wrapper for that script; its default endpoint is the testnet's public one
