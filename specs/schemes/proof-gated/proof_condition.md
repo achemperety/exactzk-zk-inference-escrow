@@ -16,7 +16,7 @@ A proof shows that the named circuit maps the committed input to the output, and
 ## Example use cases
 
 - An agent pays 0.01 USDC per inference of a pinned 52,650-parameter classifier through `auth-capture`. The hold is captured only with a valid proof, and the ten output values travel with the capture.
-- A client prepays a `batch-settlement` channel and signs, once per batch, a root over the batch's input commitments. The server claims each request's value with a proof for that request's commitment.
+- A client prepays a `batch-settlement` channel and signs, once per batch, a root over the batch's requests, each an input commitment and the payee it pays. Anyone may claim a request's value with a proof for its commitment; the value goes to that request's payee.
 - Outside x402, the same proof check completes an ERC-8183 job or answers an ERC-8004 validation request.
 
 ## The statement
@@ -33,24 +33,25 @@ A check of a proof ends in exactly one of three outcomes, and a host scheme MUST
 | Invalid | The registered verifier ran on the registered code and did not accept, or the output does not fit the entry | This proof will never pass |
 | Unverifiable | The check could not run: unknown entry, an entry that is not the registered one, or code that is not the registered code | Nothing was decided about the computation; the same proof may pass later |
 
-"Could not be checked" MUST NOT degrade into "invalid" by default. An implementation MUST report Invalid only in the case the table names. A failure it cannot classify MUST NOT be reported as Invalid.
+"Could not be checked" never becomes "invalid": [core property 1](#core-properties).
 
 The words for these outcomes on the wire, and their `errorReason` values, are defined once, in [Status words](./auth_capture_policy_evm.md#status-words). Policies, gates and operators MUST use those and define none of their own.
 
 ## Core properties
 
-1. **Proof condition.** Funds MUST reach the server only in a transaction that verified a valid proof for the verifier and input commitment the client signed. That transaction MUST carry the output, in an event or in its call data.
-2. **Who presents does not matter.** Who presents a proof MUST NOT change where the funds go: to the recipient the client signed for. Where the host scheme lets anyone submit (`auth-capture`'s `"custom"` route, the `batch-settlement` gate), anyone MAY present a proof. Under `auth-capture`'s `"policy"` type a capture also needs the receiver authorizer's signature, as that type defines.
-3. **Two failures, two reasons.** An invalid proof and a proof that cannot be checked MUST leave the payment as it was, MUST NOT be recorded, and MUST be reported as two distinct `errorReason` values, because the next step differs.
-4. **A refusal refuses one attempt.** A failed check MUST NOT end an authorization, a hold or a voucher. A hold stays capturable until the host scheme's capture deadline, and the client's exit after it is the host scheme's own: `reclaim` in `auth-capture`, the timed withdrawal in `batch-settlement`.
-5. **Terminal-only history.** What is recorded about a payment, or about one request in a batch, MUST be how it ended: settled against a proof; given back by the payee; returned to the client through the host scheme's exit. A payment that is never proven ends with nothing moved and nothing recorded about the proof.
-6. **Lane results describe requests.** When one proof covers several requests, the proof MUST be checked first and once. If it fails, the whole call MUST revert with one of the two errors of property 3. Only a call whose proof verified reports a result per lane, and that result is about the lane's request.
-7. **Full gas for the verifier.** The verifier MUST be given the full gas its registry entry names. A transaction that cannot supply it MUST revert as such, never report the proof invalid, so that a submitter cannot make a valid proof fail by under-funding it.
-8. **Content-addressed verifiers.** A registry entry MUST be immutable. Its identifier MUST commit to the proof system, the verifying-key hash, the code hashes of the adapter and the verifier, the shape of the statement and the gas allowance. The code MUST be checked against those hashes at registration and on every use. An account whose code is an EIP-7702 delegation MUST be refused.
-9. **Fresh client randomness.** The client MUST draw fresh randomness into its input commitment after the server has named the verifier, and MUST refuse terms whose verifier differs from the one first offered.
-10. **The host's guarantees stand.** The condition MUST NOT weaken the host scheme's fund safety or replay protection: at most the signed amount moves, only to the signed recipient, and each client authorization is usable once.
+1. **"Could not be checked" never becomes `ProofInvalid`.** Unverifiable MUST NOT degrade into Invalid by default. An implementation MUST report Invalid only in the case the [table](#outcomes-of-a-check) names, and a failure it cannot classify MUST NOT be reported as Invalid. The other properties rest on this one: a record that folds "not checked" into "invalid" cannot be re-read honestly later, and a verifier outage would become a false rejection.
+2. **Proof condition.** Funds MUST reach the server only in a transaction that verified a valid proof for the verifier and input commitment the client signed. That transaction MUST carry the output, in an event or in its call data.
+3. **Who presents does not matter.** Who presents a proof MUST NOT change where the funds go: to the recipient the client signed for. Where the host scheme lets anyone submit (`auth-capture`'s `"custom"` route, the `batch-settlement` gate), anyone MAY present a proof. Under `auth-capture`'s `"policy"` type a capture also needs the receiver authorizer's signature, as that type defines.
+4. **Two failures, two reasons.** An invalid proof and a proof that cannot be checked MUST leave the payment as it was, MUST NOT be recorded, and MUST be reported as two distinct `errorReason` values, because the next step differs.
+5. **A refusal refuses one attempt.** A failed check MUST NOT end an authorization, a hold or a voucher. A hold stays capturable until the host scheme's capture deadline, and the client's exit after it is the host scheme's own: `reclaim` in `auth-capture`, the timed withdrawal in `batch-settlement`.
+6. **Terminal-only history.** What is recorded about a payment, or about one request in a batch, MUST be how it ended: settled against a proof; given back by the payee; returned to the client through the host scheme's exit. A payment that is never proven ends with nothing moved and nothing recorded about the proof.
+7. **Lane results describe requests.** When one proof covers several requests, the proof MUST be checked first and once. If it fails, the whole call MUST revert with one of the two errors of property 4. Only a call whose proof verified reports a result per lane, and that result is about the lane's request.
+8. **Full gas for the verifier.** The verifier MUST be given the full gas its registry entry names. A transaction that cannot supply it MUST revert as such, never report the proof invalid, so that a submitter cannot make a valid proof fail by under-funding it.
+9. **Content-addressed verifiers.** A registry entry MUST be immutable. Its identifier MUST commit to the proof system, the verifying-key hash, the code hashes of the adapter and the verifier, the shape of the statement and the gas allowance. The code MUST be checked against those hashes at registration and on every use. An account whose code is an EIP-7702 delegation MUST be refused.
+10. **Fresh client randomness.** The client MUST draw fresh randomness into its input commitment after the server has named the verifier, and MUST refuse terms whose verifier differs from the one first offered.
+11. **The host's guarantees stand.** The condition MUST NOT weaken the host scheme's fund safety or replay protection: at most the signed amount moves, only to the signed recipient, and each client authorization is usable once.
 
-Example of properties 2, 3 and 4 together: a third party submits a tampered proof for someone else's hold. The attempt reverts with `ProofInvalid`, the hold is untouched, nothing is logged, and the server captures later with the real proof, up to the capture deadline.
+Example of properties 3, 4 and 5 together: a third party submits a tampered proof for someone else's hold. The attempt reverts with `ProofInvalid`, the hold is untouched, nothing is logged, and the server captures later with the real proof, up to the capture deadline.
 
 ## Where the condition attaches
 
@@ -59,11 +60,11 @@ Example of properties 2, 3 and 4 together: a third party submits a tampered proo
 | | `auth-capture`, proof policy | `batch-settlement`, claim gate (proposal) | Native contracts (reference) |
 |---|---|---|---|
 | Hold | The canonical `AuthCaptureEscrow` | `x402BatchSettlement` channel | Own lock, or none |
-| Condition | `captureStatus` / `chargeStatus` answer `Authorized` | The gate claims only for proven, signed commitments | `settle` / `release` check the proof |
-| What the client signs that binds the terms | `PaymentInfo.salt`, through a salt nonce derived from the terms | A root over the batch's input commitments | The terms, as the payment's id |
+| Condition | `captureStatus` / `chargeStatus` answer `Authorized` | The gate claims one unit per proven, signed commitment and pays the request's payee | `settle` / `release` check the proof |
+| What the client signs that binds the terms | `PaymentInfo.salt`, through a salt nonce derived from the terms | A root over the batch's input commitments and payees | The terms, as the payment's id |
 | Client | Must derive the salt nonce from the terms | Must sign the root | Proof-aware client |
 | Runs today | Through a `"custom"` operator fixed to the policy | As a prototype, locally | Deployed on a testnet |
-| Measured (local; [details](./reference_evm.md#gas-baseline)) | 899,361 gas for `authorize` + capture, 841,355 for a charge (USDC) | 769,210 gas per claim, steady (a claim moves no token) | 768,174 for one-transaction `settle` (USDC) |
+| Measured (local; [details](./reference_evm.md#gas-baseline)) | 899,361 gas for `authorize` + capture, 841,355 for a charge (USDC) | 793,639 gas per claim, steady, payee paid in the claim (test token) | 768,174 for one-transaction `settle` (USDC) |
 
 ## Model identity
 
@@ -110,3 +111,4 @@ Every binding of the condition to a host scheme on a network MUST specify:
 |---|---|---|---|
 | v0.1 | 2026-11-24 | Draft for discussion, as a dedicated scheme | @achemperety |
 | v0.2 | 2026-11-25 | Shape (a): a policy profile for `auth-capture` with a reason-returning check, a claim-condition proposal for `batch-settlement`; the native contracts kept as reference and gas baseline | @achemperety |
+| v0.3 | 2026-11-25 | "Could not be checked never becomes `ProofInvalid`" moved to core property 1, the others renumbered; `batch-settlement` proposal: a payee in each request, one root per batch | @achemperety |
