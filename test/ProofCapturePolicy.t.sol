@@ -185,14 +185,14 @@ contract ProofCapturePolicyTest is ProofCapturePolicyBase {
         vm.etch(SOLO, _soloCode());
 
         // The adapter's code is not the registered code.
-        bytes memory adapterCode = address(adapter).code;
-        vm.etch(address(adapter), hex"600160005260206000f3");
+        bytes memory adapterCode = address(adapterV2).code;
+        vm.etch(address(adapterV2), hex"600160005260206000f3");
         for (uint256 i = 0; i < cases.length; i++) {
             assertEq(_status(p, cases[i]), PolicyStatus.VERIFIER_UNAVAILABLE, "adapter code changed");
             _expectRefused(PolicyStatus.VERIFIER_UNAVAILABLE);
             pop.captureWithPolicy(p, cases[i]);
         }
-        vm.etch(address(adapter), adapterCode);
+        vm.etch(address(adapterV2), adapterCode);
         _assertHeld(p);
     }
 

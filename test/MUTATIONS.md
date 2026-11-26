@@ -99,7 +99,7 @@ A19 is a change to `foundry.toml`, not to the adapter: at 200 optimizer runs the
 | P14 | Adapter's success flag ignored | 1: `test_misbehaving_adapters_never_give_valid` |
 | P15 | Adapter's return size not checked | 1: `test_misbehaving_adapters_never_give_valid` |
 | P16 | Any non-zero return word accepted | 1: `test_misbehaving_adapters_never_give_valid` |
-| P17 | Status order changed so that zero means Valid | 1: `test_zero_value_of_the_status_is_invalid` |
+| P17 | Status order changed so that zero means Valid | 1: `test_zero_value_of_the_status_is_invalid` (since renamed `test_zero_value_of_the_status_is_unverifiable`: zero now means Unverifiable, see OG5) |
 | P18 | Scratch word not cleared before the call | **none: survived, see below** |
 | P19 | Check answers Valid without asking the adapter | 7: `test_adapter_cannot_spend_more_than_its_allowance`, `test_always_true_adapter_is_valid_and_always_false_is_invalid`, `test_misbehaving_adapters_never_give_valid`, `test_misbehaving_targets_behind_the_ezkl_adapter_never_give_valid`, `test_proof_checked_against_the_other_circuit_is_invalid`, `test_tampered_proof_is_invalid_and_does_not_revert`, `test_wrong_output_is_invalid_and_does_not_revert` |
 
@@ -918,3 +918,31 @@ Run on 2026-11-25. 12 mutations of `RecordedProofPolicy.sol`, run with `--match-
 | HP10 | the record key hashes the proof without the output | 4: `setUp`, `test_a_proof_can_be_presented_again_after_verifier_unavailable`, `test_a_recorded_invalid_proof_is_proof_invalid_and_does_not_block_the_real_one`, `test_anyone_records_anyone_captures_and_the_output_is_in_the_record_event` |
 | HP11 | `recordCheck` writes a second storage slot | 1: `test_gas_record_check_then_capture_steady` (`recordCheck` 730,172 > 728,200) |
 | HP12 | the policy hook also reads the registry entry | 1: `test_gas_record_check_then_capture_steady` (capture 88,917 > 74,600) |
+
+## Out of gas is never Invalid (`ProofCheck`, `Halo2EzklAdapterV2`; docs/known-issues/2026-11-out-of-gas-as-invalid.md)
+
+Run on 2026-11-27. 9 mutations, each run with the full suite (`forge test`) and restored byte for byte afterwards; all were caught. The clean tree passes 432 tests here (37 skipped), before the deployment tests below were added. Gas pins that a mutation also moved are listed with the rest; they are not what catches it. With the exhaustion rule removed (AV1), adapter V2 compiles to exactly the deployed adapter's bytecode, so two tests also fail at registration with `AlreadyRegistered`.
+
+| Id | Deliberate breakage | Tests that failed |
+|---|---|---|
+| OG1 | the check's threshold 1/32 instead of 1/16 | 3: `test_check_boundary_is_one_sixteenth_of_the_allowance` (flip point 35,500, not 37,500), `test_deployed_entries_report_a_final_pairing_rejection_as_unverifiable`, `test_exhaustion_to_depth_4_is_unverifiable_behind_the_deployed_adapter` (d = 3: Invalid) |
+| OG2 | a `false` is Invalid whatever gas it used (the v3.0 rule) | 18: `test_a_valid_proof_short_of_its_allowance_is_never_invalid` ("a valid proof read as Invalid"), `test_check_boundary_is_one_sixteenth_of_the_allowance`, `test_deployed_entries_report_a_final_pairing_rejection_as_unverifiable`, `test_exhaustion_to_depth_4_is_unverifiable_behind_the_deployed_adapter` (d = 1: Invalid), `test_misbehaving_targets_behind_the_ezkl_adapter_never_give_valid`, `test_g16_settle_rejects_a_changed_proof`, and the twelve channel sweep pins (execution 31 gas lower) |
+| OG3 | a revert or a malformed answer read as Invalid | 4: `test_a_valid_proof_short_of_its_allowance_is_never_invalid`, `test_adapter_cannot_spend_more_than_its_allowance`, `test_exhaustion_to_depth_4_is_unverifiable_behind_adapter_v2` (d = 1: Invalid), `test_misbehaving_adapters_never_give_valid` |
+| OG4 | an answer other than 0 or 1, and a `false` near exhaustion, read as Invalid | 7: `test_a_valid_proof_short_of_its_allowance_is_never_invalid`, `test_check_boundary_is_one_sixteenth_of_the_allowance`, `test_deployed_entries_report_a_final_pairing_rejection_as_unverifiable`, `test_exhaustion_to_depth_4_is_unverifiable_behind_the_deployed_adapter`, `test_g16_settle_rejects_a_changed_proof`, `test_misbehaving_adapters_never_give_valid`, `test_misbehaving_targets_behind_the_ezkl_adapter_never_give_valid` |
+| OG5 | status order back to `Invalid = 0, Valid, Unverifiable` | 1: `test_zero_value_of_the_status_is_unverifiable` (`0 != 2`) |
+| AV1 | adapter V2 without the exhaustion rule | 6: `test_adapter_v2_boundary_is_one_sixteenth_of_its_gas`, `test_adapter_v2_reverts_on_exhaustion_to_depth_4` (d = 1), `test_adapter_v2_reverts_when_the_real_verifier_runs_out_of_gas`, `test_a_valid_proof_short_of_its_allowance_is_never_invalid` and `test_depth_5_reads_as_a_rejection_which_is_why_it_must_not_be_registered` (`AlreadyRegistered`, see above), `test_gas_k16_first_batch_new_channels_first_accrual` |
+| AV2 | adapter V2 threshold 1/32 instead of 1/16 | 3: `test_adapter_v2_boundary_is_one_sixteenth_of_its_gas`, `test_adapter_v2_reverts_on_exhaustion_to_depth_4` (d = 3), `test_gas_k16_first_batch_new_channels_first_accrual` |
+| AV3 | adapter V2 compares with a fixed 1,000,000, not the gas it started with | 2: `test_adapter_v2_boundary_is_one_sixteenth_of_its_gas`, `test_depth_5_reads_as_a_rejection_which_is_why_it_must_not_be_registered` |
+| SZ1 | the new solo entry sized at 640,000, under 1.10 times the first call | 2: `test_first_call_surcharge_is_eip2929_and_new_entries_are_sized_over_it` (64,000,000 < 64,423,370), `test_gas_k16_first_batch_new_channels_first_accrual` |
+
+### The v3.1 deployment script (`script/DeployV31BaseSepolia.s.sol`, `--match-path test/DeployV31BaseSepolia.t.sol`)
+
+Run on 2026-11-27, restored afterwards; the suite has 7 tests and all pass on the clean tree.
+
+| Id | Deliberate breakage | Tests that failed |
+|---|---|---|
+| DV1 | the registry's code not checked | 1: `test_refuses_a_registry_whose_code_is_not_verifier_registry` |
+| DV2 | `run()` not overridden, so the file would run the v3.0 deployment it inherits | 1: `test_run_refuses_so_this_file_never_deploys_v30` |
+| DV3 | the solo entry registered with the K=8 allowance | 3: `test_deploys_v31_into_the_v30_registry`, `test_refuses_to_run_twice`, `test_the_new_solo_entry_reports_a_wrong_output_as_invalid` (all `check: solo verifier id`) |
+| DV4 | no check that the v3.1 entries are new | 1: `test_refuses_to_run_twice` (`AlreadyRegistered` instead of the preflight message) |
+| DV5 | the solo verifier's address not compared with the registered entry | 1: `test_refuses_a_verifier_that_is_not_the_pinned_one` |

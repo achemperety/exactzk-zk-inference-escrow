@@ -70,12 +70,14 @@ contract ProofCheckTest is ProofCoreBase {
         _assertStatus(harness.checkWithEntry(k8Id, k8Entry, c, o, p), ProofStatus.Invalid);
     }
 
-    function test_zero_value_of_the_status_is_invalid() public pure {
+    /// The zero value is Unverifiable: a status nobody set means "nothing was decided", never
+    /// acceptance and never a rejection. Valid is 1, the adapter's success word.
+    function test_zero_value_of_the_status_is_unverifiable() public pure {
         ProofStatus unset;
-        assertEq(uint8(unset), uint8(ProofStatus.Invalid));
-        assertEq(uint8(ProofStatus.Invalid), 0);
+        assertEq(uint8(unset), uint8(ProofStatus.Unverifiable));
+        assertEq(uint8(ProofStatus.Unverifiable), 0);
         assertEq(uint8(ProofStatus.Valid), 1);
-        assertEq(uint8(ProofStatus.Unverifiable), 2);
+        assertEq(uint8(ProofStatus.Invalid), 2);
     }
 
     // ── Unverifiable ────────────────────────────────────────────────────────────────────────────
@@ -123,7 +125,7 @@ contract ProofCheckTest is ProofCoreBase {
     function test_adapter_whose_code_changed_is_unverifiable() public {
         (bytes32[] memory c, bytes memory o, bytes memory p) = _solo();
         _setWord(o, 0, _word(o, 0) + 1);
-        vm.etch(address(adapter), address(new AlwaysTrueAdapter()).code);
+        vm.etch(address(adapterV2), address(new AlwaysTrueAdapter()).code);
         _assertStatus(harness.checkWithEntry(soloId, soloEntry, c, o, p), ProofStatus.Unverifiable);
         _assertStatus(harness.checkById(soloId, c, o, p), ProofStatus.Unverifiable);
     }
@@ -167,6 +169,7 @@ contract ProofCheckTest is ProofCoreBase {
         );
     }
 
+    /// None of these answers is a definite rejection, so all are Unverifiable.
     function test_misbehaving_adapters_never_give_valid() public {
         address[6] memory bad = [
             address(new RevertingAdapter()),
@@ -179,11 +182,13 @@ contract ProofCheckTest is ProofCoreBase {
         for (uint256 i = 0; i < bad.length; i++) {
             _assertStatus(
                 _registerAndCheck(_entry(bad[i], SOLO, 1, OUTPUT_SIZE, 100_000, bytes32(uint256(i)))),
-                ProofStatus.Invalid
+                ProofStatus.Unverifiable
             );
         }
     }
 
+    /// The deployed adapter turns each of these into `false`. A cheap failure leaves gas to spare
+    /// and is a rejection; the burner exhausts the allowance and is Unverifiable.
     function test_misbehaving_targets_behind_the_ezkl_adapter_never_give_valid() public {
         address[6] memory bad = [
             address(new RevertingTarget()),
@@ -196,7 +201,7 @@ contract ProofCheckTest is ProofCoreBase {
         for (uint256 i = 0; i < bad.length; i++) {
             _assertStatus(
                 _registerAndCheck(_entry(address(adapter), bad[i], 1, OUTPUT_SIZE, 100_000, bytes32(uint256(i)))),
-                ProofStatus.Invalid
+                i == 2 ? ProofStatus.Unverifiable : ProofStatus.Invalid
             );
         }
     }
@@ -207,7 +212,7 @@ contract ProofCheckTest is ProofCoreBase {
         bytes32 id = registry.register(e);
         (bytes32[] memory c, bytes memory o, bytes memory p) = _solo();
 
-        _assertStatus(harness.checkWithEntry{gas: 5_000_000}(id, e, c, o, p), ProofStatus.Invalid);
+        _assertStatus(harness.checkWithEntry{gas: 5_000_000}(id, e, c, o, p), ProofStatus.Unverifiable);
         uint256 used = vm.lastCallGas().gasTotalUsed;
         emit log_named_uint("gas used with a 100,000 allowance and an adapter that burns everything", used);
         assertLt(used, 150_000);

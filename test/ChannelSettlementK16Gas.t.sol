@@ -130,7 +130,7 @@ contract ChannelGasK16FirstTest is ChannelK16Base {
         TxGas memory g = _measure(address(settlement), data, _coldK16());
         _log("K=16, sixteen new channels, provider's first accrual", g);
         assertEq(settlement.accrued(provider, address(token)), 16 * AMOUNT, "the measured call settled every lane");
-        assertLe(g.total, 1_154_200, "pin: measured 1,154,162");
+        assertLe(g.total, 1_154_200, "pin: measured 1,154,183");
     }
 }
 
@@ -151,7 +151,7 @@ contract ChannelGasK16SteadyTest is ChannelK16Base {
         emit log_named_uint("K=16, steady, per request", g.total / 16);
         assertEq(settlement.accrued(provider, address(token)), 32 * AMOUNT, "the measured call settled every lane");
         assertLe(g.total, K16_STEADY_ACCEPTANCE, "acceptance: K=16 steady <= 1,170,000");
-        assertLe(g.total, 1_137_100, "pin: measured 1,137,050");
+        assertLe(g.total, 1_137_200, "pin: measured 1,137,131");
     }
 }
 

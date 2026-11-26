@@ -44,7 +44,7 @@ contract AuthCaptureStockClientTest is AuthCaptureBase {
         sig = vm.parseJsonBytes(j, ".payload.signature");
         saltNonce = vm.parseJsonUint(j, ".payload.saltNonce");
         advertisedAuthorizer = vm.parseJsonAddress(j, ".accepted.extra.receiverAuthorizer");
-        assertEq(vm.parseJsonBytes32(j, ".accepted.extra.verifierId"), soloId, "same verifier entry as here");
+        assertEq(vm.parseJsonBytes32(j, ".accepted.extra.verifierId"), soloIdV1, "same verifier entry as here");
         assertEq(vm.parseJsonBytes32(j, ".accepted.extra.inputCommitment"), commitment, "same input commitment");
         token.mint(p.payer, 10 * AMOUNT);
         vm.warp(p.preApprovalExpiry - 600); // when it was signed
@@ -55,15 +55,17 @@ contract AuthCaptureStockClientTest is AuthCaptureBase {
         _;
     }
 
+    /// The recorded payment was signed for the entry registered with v3.0.0-testnet (the deployed
+    /// adapter, 600,000 gas), so this suite checks against that entry.
     function _t() internal view returns (AuthCaptureProofOperator.Terms memory) {
-        return _terms(saltNonce);
+        return AuthCaptureProofOperator.Terms({verifierId: soloIdV1, inputCommitment: commitment, saltNonce: saltNonce});
     }
 
     function test_x402s_client_bound_the_terms_through_receiver_authorizer() public withFixture {
         assertEq(
-            advertisedAuthorizer, op.termsAuthorizer(soloId, commitment), "the server advertised the terms address"
+            advertisedAuthorizer, op.termsAuthorizer(soloIdV1, commitment), "the server advertised the terms address"
         );
-        assertEq(p.salt, op.boundSalt(soloId, commitment, saltNonce), "the client's salt binds it, unchanged");
+        assertEq(p.salt, op.boundSalt(soloIdV1, commitment, saltNonce), "the client's salt binds it, unchanged");
     }
 
     function test_x402s_client_payment_is_held_and_captured_only_with_a_valid_proof() public withFixture {
@@ -75,14 +77,14 @@ contract AuthCaptureStockClientTest is AuthCaptureBase {
         bytes memory bad = bytes.concat(proof);
         bad[100] = bytes1(uint8(bad[100]) ^ 0x01);
         vm.expectRevert(AuthCaptureProofOperator.ProofInvalid.selector);
-        op.captureWithProof(p, _t(), soloEntry, output, bad);
-        VerifierEntry memory e = soloEntry;
+        op.captureWithProof(p, _t(), soloEntryV1, output, bad);
+        VerifierEntry memory e = soloEntryV1;
         e.verifyGas += 1;
-        vm.expectRevert(abi.encodeWithSelector(AuthCaptureProofOperator.VerifierUnavailable.selector, soloId));
+        vm.expectRevert(abi.encodeWithSelector(AuthCaptureProofOperator.VerifierUnavailable.selector, soloIdV1));
         op.captureWithProof(p, _t(), e, output, proof);
         assertEq(token.balanceOf(p.receiver), 0, "nothing paid on a failed check");
 
-        op.captureWithProof(p, _t(), soloEntry, output, proof);
+        op.captureWithProof(p, _t(), soloEntryV1, output, proof);
         assertEq(token.balanceOf(p.receiver), AMOUNT, "paid with the proof");
         assertEq(token.balanceOf(p.payer), 9 * AMOUNT, "the payer paid once");
     }

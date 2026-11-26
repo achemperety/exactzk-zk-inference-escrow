@@ -17,9 +17,12 @@ interface IProofVerifier {
     /// @param outputs     `commitments.length * outputSize` bytes, lane after lane.
     /// @param proof       Opaque proof bytes.
     /// @return ok         True if and only if the proof establishes every lane's statement.
-    /// @dev MUST return false, not revert, for a bad proof, a malformed argument or a failing
-    /// `target`. Callers treat a revert, running out of gas and any return value other than a
-    /// single 32-byte `1` as "not verified".
+    /// @dev MUST return false, not revert, for a definite rejection: a bad proof, a malformed
+    /// argument, a public input outside the proof system's field. SHOULD revert, not return false,
+    /// when it cannot tell a rejection from a failure of `target`, for example because `target`
+    /// ran out of gas. `ProofCheck` reads a single 32-byte `1` as Valid, a `0` returned with gas to
+    /// spare as Invalid, and anything else (a revert, running out of gas, any other answer, a `0`
+    /// after nearly the whole allowance was used) as Unverifiable.
     function verify(
         address target,
         uint32 outputSize,

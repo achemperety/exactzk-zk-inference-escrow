@@ -99,12 +99,17 @@ contract Groth16AdapterTest is Groth16Base {
         );
     }
 
+    /// Byte 40 lies in the x coordinate of point A, so the changed proof holds a point off the
+    /// curve. A BN254 precompile (point addition, multiplication or pairing), given a point off
+    /// the curve, fails and consumes all the gas it is
+    /// given, which cannot be told from running out of gas: the check reads it as Unverifiable
+    /// and settlement refuses it with `VerifierUnavailable`. Nothing is paid either way.
     function test_g16_settle_rejects_a_changed_proof() public {
         bytes memory p = Groth16Fixture.proof();
         p[40] ^= 0x01;
         (bool ok, bytes memory ret) = address(settlement).call(_settleData(p));
         assertFalse(ok, "reverts");
-        assertEq(bytes4(ret), SoloSettlement.ProofInvalid.selector, "ProofInvalid");
+        assertEq(bytes4(ret), SoloSettlement.VerifierUnavailable.selector, "VerifierUnavailable");
     }
 }
 

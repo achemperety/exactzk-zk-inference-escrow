@@ -30,8 +30,8 @@ A check of a proof ends in exactly one of three outcomes, and a host scheme MUST
 | Outcome | When | What it tells the client and the server |
 |---|---|---|
 | Valid | The registered verifier ran on the registered code and accepted | The condition holds |
-| Invalid | The registered verifier ran on the registered code and did not accept, or the output does not fit the entry | This proof will never pass |
-| Unverifiable | The check could not run: unknown entry, an entry that is not the registered one, or code that is not the registered code | Nothing was decided about the computation; the same proof may pass later |
+| Invalid | The registered verifier ran on the registered code and rejected the proof with more than 1/16 of its gas allowance unspent, or the output does not fit the entry | This proof will never pass |
+| Unverifiable | The check could not run or gave no definite answer: unknown entry, an entry that is not the registered one, code that is not the registered code, or a verifier that reverted, answered something else, or rejected with 1/16 of its allowance or less unspent, which cannot be told from running out of gas | Nothing was decided about the computation; the same proof may pass later |
 
 "Could not be checked" never becomes "invalid": [core property 1](#core-properties).
 

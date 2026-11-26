@@ -9,6 +9,7 @@ import {IProofVerifier} from "../src/IProofVerifier.sol";
 import {IVerifierRegistry, VerifierEntry} from "../src/IVerifierRegistry.sol";
 import {VerifierRegistry} from "../src/VerifierRegistry.sol";
 import {Halo2EzklAdapter} from "../src/Halo2EzklAdapter.sol";
+import {Halo2EzklAdapterV2} from "../src/Halo2EzklAdapterV2.sol";
 import {ProofStatus} from "../src/ProofCheck.sol";
 import {ProofCheckHarness} from "./mocks/Mocks.sol";
 
@@ -33,6 +34,11 @@ abstract contract ProofCoreBase is Test {
     // Gas the registry entries hand to the adapter.
     uint32 internal constant SOLO_VERIFY_GAS = 600_000;
     uint32 internal constant K8_VERIFY_GAS = 660_000;
+    /// Allowances of the entries for `Halo2EzklAdapterV2`: at least 1.10 times the verifier's valid
+    /// path on a first call (cold accounts), so that a genuine rejection leaves more than 1/16 of
+    /// the allowance unspent (docs/known-issues/2026-11-out-of-gas-as-invalid.md).
+    uint32 internal constant SOLO_VERIFY_GAS_V2 = 645_000;
+    uint32 internal constant K8_VERIFY_GAS_V2 = 712_000;
 
     uint32 internal constant OUTPUT_SIZE = 320; // 10 field elements per lane
 
@@ -40,23 +46,37 @@ abstract contract ProofCoreBase is Test {
     uint256 internal constant R = 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001;
 
     VerifierRegistry internal registry;
-    Halo2EzklAdapter internal adapter;
+    Halo2EzklAdapter internal adapter; // the deployed adapter (v3.0.0-testnet)
+    Halo2EzklAdapterV2 internal adapterV2;
     ProofCheckHarness internal harness;
 
+    // The entries every consumer test runs against: adapter V2 with allowances sized for the 1/16
+    // rule, as v3.1 registers them.
     VerifierEntry internal soloEntry;
     VerifierEntry internal k8Entry;
     bytes32 internal soloId;
     bytes32 internal k8Id;
+    // The entries registered on the testnet for v3.0.0-testnet: the deployed adapter, 600,000 and
+    // 660,000. Immutable; kept for the deployment tests and docs/known-issues.
+    VerifierEntry internal soloEntryV1;
+    VerifierEntry internal k8EntryV1;
+    bytes32 internal soloIdV1;
+    bytes32 internal k8IdV1;
 
     function setUp() public virtual {
         vm.etch(SOLO, Fixtures.verifierBytecode());
         vm.etch(K8, FixturesK8.verifierBytecode());
         registry = new VerifierRegistry();
         adapter = new Halo2EzklAdapter();
+        adapterV2 = new Halo2EzklAdapterV2();
         harness = new ProofCheckHarness(registry);
 
-        soloEntry = _entry(address(adapter), SOLO, 1, OUTPUT_SIZE, SOLO_VERIFY_GAS, SOLO_VK_HASH);
-        k8Entry = _entry(address(adapter), K8, 8, OUTPUT_SIZE, K8_VERIFY_GAS, K8_VK_HASH);
+        soloEntryV1 = _entry(address(adapter), SOLO, 1, OUTPUT_SIZE, SOLO_VERIFY_GAS, SOLO_VK_HASH);
+        k8EntryV1 = _entry(address(adapter), K8, 8, OUTPUT_SIZE, K8_VERIFY_GAS, K8_VK_HASH);
+        soloIdV1 = registry.register(soloEntryV1);
+        k8IdV1 = registry.register(k8EntryV1);
+        soloEntry = _entry(address(adapterV2), SOLO, 1, OUTPUT_SIZE, SOLO_VERIFY_GAS_V2, SOLO_VK_HASH);
+        k8Entry = _entry(address(adapterV2), K8, 8, OUTPUT_SIZE, K8_VERIFY_GAS_V2, K8_VK_HASH);
         soloId = registry.register(soloEntry);
         k8Id = registry.register(k8Entry);
     }

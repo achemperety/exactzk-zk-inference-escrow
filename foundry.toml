@@ -54,7 +54,7 @@ cbor_metadata = false
 
 # Tests read the pinned verifier bytecode from test/fixtures/. The x402 local-chain script
 # (script/X402LocalChain.s.sol) writes the chain state for the end-to-end run to x402/.state/.
-fs_permissions = [{ access = "read", path = "test/fixtures/" }, { access = "read-write", path = "x402/.state/" }]
+fs_permissions = [{ access = "read", path = "test/fixtures/" }, { access = "read", path = "deployments/" }, { access = "read-write", path = "x402/.state/" }]
 
 [fuzz]
 runs = 512

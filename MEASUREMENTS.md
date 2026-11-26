@@ -2,6 +2,8 @@
 
 Every gas figure of version 3, next to the previous version's figure for the same job where one exists. Re-run on the final code on 2026-11-24. Method, breakdowns and the tests behind each row are in the folders under `measurements/`. The testnet rows are receipts from Base Sepolia, each with its transaction hash in `measurements/2026-11-24-testnet/`.
 
+**Version 3.1, not yet deployed.** The figures below are those of `v3.0.0-testnet`. Version 3.1 ([docs/known-issues/2026-11-out-of-gas-as-invalid.md](docs/known-issues/2026-11-out-of-gas-as-invalid.md)) classifies the adapter's answer by the gas it used, and its entries use `Halo2EzklAdapterV2`. The tests that pin these figures were updated to the 3.1 code: each execution figure of the channel sweep rose by 69 gas, its calldata figures moved by −36 to +24 with the adapter's address in the entry, and the K=16 steady batch is 1,137,131 (+81; 1,137,050 below). Every figure will be re-measured with the 3.1 deployment.
+
 ## How the figures were taken
 
 - **Local (version 3).** `forge test`, Osaka gas schedule. `test/GasMeter.sol` rebuilds a transaction's gas from its parts: 21,000, plus calldata at 4 and 16 gas per zero and non-zero byte (or the EIP-7623 floor, when higher), plus the call frame's execution, minus the capped refund. Every account the call touches starts cold. "Test token" is the repository's ERC-3009 mock. "USDC" is Circle's USDC on a fork of Base Sepolia at block 62,638,490. A batch never calls the token, so its gas is the same with either. Gas does not depend on the machine.

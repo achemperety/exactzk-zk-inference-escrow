@@ -75,8 +75,8 @@ contract DeployBaseSepoliaTest is ProofCoreBase {
         assertEq(d.deployer, DEFAULT_SENDER, "the broadcaster deploys");
         assertEq(d.soloVerifier.codehash, MANIFEST_SOLO_CODE_HASH, "solo verifier: the pinned bytes");
         assertEq(d.k8Verifier.codehash, MANIFEST_K8_CODE_HASH, "K=8 verifier: the pinned bytes");
-        assertEq(d.soloId, soloId, "solo id: the id the tests compute");
-        assertEq(d.k8Id, k8Id, "K=8 id: the id the tests compute");
+        assertEq(d.soloId, soloIdV1, "solo id: the id the tests compute");
+        assertEq(d.k8Id, k8IdV1, "K=8 id: the id the tests compute");
         assertTrue(d.registry.exists(d.soloId) && d.registry.exists(d.k8Id), "both registered");
 
         // The deployed verifiers accept the stored proofs.

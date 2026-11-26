@@ -417,19 +417,19 @@ contract ChannelSweepSteadyTest is ChannelSweepBase {
 /// calldata at 4 and 16 gas per byte, for K = 1, 2, 4, 8, 16, 32.
 library ChannelSweepFigures {
     function firstExecution(uint256 j) internal pure returns (uint256) {
-        return [uint256(56_868), 69_710, 95_049, 145_736, 247_507, 451_230][j];
+        return [uint256(56_937), 69_779, 95_118, 145_805, 247_576, 451_299][j];
     }
 
     function steadyExecution(uint256 j) internal pure returns (uint256) {
-        return [uint256(39_768), 52_610, 77_949, 128_636, 230_407, 434_130][j];
+        return [uint256(39_837), 52_679, 78_018, 128_705, 230_476, 434_199][j];
     }
 
     function firstCalldata(uint256 j) internal pure returns (uint256) {
-        return [uint256(75_396), 82_584, 95_808, 125_344, 182_084, 295_576][j];
+        return [uint256(75_396), 82_584, 95_808, 125_344, 182_060, 295_540][j];
     }
 
     function steadyCalldata(uint256 j) internal pure returns (uint256) {
-        return [uint256(75_396), 82_572, 95_796, 125_332, 182_084, 295_564][j];
+        return [uint256(75_408), 82_596, 95_820, 125_356, 182_108, 295_588][j];
     }
 }
 

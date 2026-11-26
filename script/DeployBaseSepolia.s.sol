@@ -91,7 +91,7 @@ contract DeployBaseSepolia is Script {
     /// PUSH1 11, CODESIZE, SUB, DUP1, PUSH1 11, RETURNDATASIZE, CODECOPY, RETURNDATASIZE, RETURN.
     bytes internal constant RAW_RUNTIME_PREFIX = hex"600b380380600b3d393df3";
 
-    function run() external returns (Deployment memory d) {
+    function run() external virtual returns (Deployment memory d) {
         Expected memory c = _chain();
         vm.startBroadcast();
         (, d.deployer,) = vm.readCallers();

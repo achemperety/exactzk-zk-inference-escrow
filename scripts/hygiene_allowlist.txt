@@ -85,6 +85,8 @@ hash 0x70e974cd4484f8c452c21caf8f61a2385696aff32fc3a1f923f539a1e0b0b8f8  # the s
 # ── Verifier ids (content hashes of the registered entries, docs/deployment-notes.md) ──
 hash 0xc302c6867eddfdcd201bbe7fb653191da6ee4c1a178e7df821e9ebca01b6ff9b  # VerifierRegistry id of the solo entry
 hash 0xff34bcad7f2abcb126327e61b648bae1d6a446ad3bd15924ec2218c742d51107  # VerifierRegistry id of the K=8 entry
+hash 0x660e857f27694c13851bfd3b8558b8a8e7e76d5fc48b3b31f60f8fa3f086c1e1  # VerifierRegistry id of the v3.1 solo entry (Halo2EzklAdapterV2, 645,000), computed by the tests
+hash 0x81e1e6281df75ff6da92568a8f6448aa11150fed22cbf5396465a764cc83c286  # VerifierRegistry id of the v3.1 K=8 entry (Halo2EzklAdapterV2, 712,000), computed by the tests
 hash 0x2b8e2b3726c48d66da7275424b8db3a590c21ff19d52e3783e3e051ea3600460  # EXPERIMENTAL Groth16 prototype: Poseidon2 commitment of the published solo input (measurements/experimental/groth16)
 hash 0xddb7fff5097d85fa757f4e918297f832e3a24280444f6818ded34ba01fb855d6  # EXPERIMENTAL Groth16 prototype: keccak256 of its verifying-key file (the same)
 hash 0xa3490d874b6e2fee46b3d20d3355d71980e8fed85b8860c6cabffc2d46d63518  # keccak256 of the K=16 circuit's vk.key (measurements/2026-11-24-k16)
@@ -135,6 +137,9 @@ kw sepolia scripts/deploy.sh  # wrapper for that script; its default endpoint is
 kw sepolia scripts/escrow_live_check.py  # names the testnet whose escrow it compares
 kw sepolia test/DeployBaseSepolia.t.sol  # tests of the deployment script, named after it
 kw sepolia test/DeployBaseSepoliaFork.t.sol  # names the forked testnet; the endpoint comes from FORK_RPC_URL
+kw sepolia script/DeployV31BaseSepolia.s.sol  # the v3.1 deployment script for the testnet; the endpoint is passed on the command line
+kw sepolia test/DeployV31BaseSepolia.t.sol  # tests of the v3.1 deployment script, named after it
+kw sepolia docs/known-issues/*  # names the testnet whose deployment a known issue affects
 kw sepolia SECURITY.md  # names the testnet whose escrow was compared with the source
 kw sepolia test/MUTATIONS.md  # names the deployment script and its tests, whose names carry the testnet's
 kw sepolia deployments/*  # each deployment record names its network

@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import {ProofCoreBase} from "./ProofCoreBase.sol";
 import {IVerifierRegistry, VerifierEntry} from "../src/IVerifierRegistry.sol";
 import {VerifierRegistry} from "../src/VerifierRegistry.sol";
-import {Halo2EzklAdapter} from "../src/Halo2EzklAdapter.sol";
+import {Halo2EzklAdapterV2} from "../src/Halo2EzklAdapterV2.sol";
 import {
     AcceptAllTarget,
     RejectAllTarget,
@@ -39,13 +39,13 @@ contract VerifierRegistryTest is ProofCoreBase {
             expectedId,
             SOLO_VK_HASH,
             SOLO,
-            address(adapter),
-            address(adapter).codehash,
+            soloEntry.adapter,
+            soloEntry.adapter.codehash,
             SOLO.codehash,
             EZKL,
             1,
             OUTPUT_SIZE,
-            SOLO_VERIFY_GAS,
+            SOLO_VERIFY_GAS_V2,
             bytes32(0)
         );
         bytes32 id = fresh.register(soloEntry);
@@ -95,9 +95,9 @@ contract VerifierRegistryTest is ProofCoreBase {
     function test_same_code_at_other_addresses_cannot_replace_an_entry() public {
         address otherTarget = makeAddr("second copy of the solo verifier");
         vm.etch(otherTarget, SOLO.code);
-        Halo2EzklAdapter otherAdapter = new Halo2EzklAdapter();
+        Halo2EzklAdapterV2 otherAdapter = new Halo2EzklAdapterV2();
         VerifierEntry memory copy =
-            _entry(address(otherAdapter), otherTarget, 1, OUTPUT_SIZE, SOLO_VERIFY_GAS, SOLO_VK_HASH);
+            _entry(address(otherAdapter), otherTarget, 1, OUTPUT_SIZE, SOLO_VERIFY_GAS_V2, SOLO_VK_HASH);
         assertEq(_id(EZKL, copy), soloId, "same content, same id");
 
         vm.expectRevert(abi.encodeWithSelector(IVerifierRegistry.AlreadyRegistered.selector, soloId));
@@ -167,7 +167,7 @@ contract VerifierRegistryTest is ProofCoreBase {
         tooSmall.verifyGas = 1;
         bytes32 id = registry.register(tooSmall);
         assertTrue(id != soloId);
-        assertEq(registry.entry(soloId).verifyGas, SOLO_VERIFY_GAS);
+        assertEq(registry.entry(soloId).verifyGas, SOLO_VERIFY_GAS_V2);
         assertEq(registry.entry(id).verifyGas, 1);
     }
 
@@ -180,9 +180,9 @@ contract VerifierRegistryTest is ProofCoreBase {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IVerifierRegistry.CodeHashMismatch.selector,
-                address(adapter),
+                address(adapterV2),
                 e.adapterCodeHash,
-                address(adapter).codehash
+                address(adapterV2).codehash
             )
         );
         registry.register(e);
