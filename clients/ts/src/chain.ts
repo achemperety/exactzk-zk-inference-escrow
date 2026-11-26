@@ -1,6 +1,6 @@
 /**
- * The deployment on Base Sepolia (deployments/base-sepolia.json), the parts of its ABIs the client
- * uses, and how a contract error becomes an x402 `errorReason` (docs/spec-notes.md, rule 2).
+ * The deployment on Base Sepolia (deployments/base-sepolia-v3.1.json; v3.0 in base-sepolia.json), the
+ * parts of its ABIs the client uses, and how a contract error becomes an x402 `errorReason` (docs/spec-notes.md, rule 2).
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -29,15 +29,17 @@ export type Deployment = {
   chainId: number;
   commit: string;
   contracts: Record<
-    "VerifierRegistry" | "Halo2EzklAdapter" | "soloVerifier" | "k8Verifier" | "SoloSettlement" | "ChannelSettlement" |
-      "ProofEvaluator8183" | "ProofValidator8004" | "AuthCaptureProofOperator",
+    "VerifierRegistry" | "soloVerifier" | "k8Verifier" | "SoloSettlement" | "ChannelSettlement" | "ProofEvaluator8183" |
+      "AuthCaptureProofOperator",
     Address
-  >;
+  > &
+    // v3.0 has Halo2EzklAdapter and ProofValidator8004; v3.1 has Halo2EzklAdapterV2, its validator still to come.
+    Partial<Record<"Halo2EzklAdapter" | "Halo2EzklAdapterV2" | "ProofValidator8004", Address>>;
   verifierIds: { solo: Hex; k8: Hex };
 };
 
-/** `deployments/<name>.json` of this repository. */
-export function loadDeployment(repoRoot: string, name = "base-sepolia"): Deployment {
+/** `deployments/<name>.json` of this repository; by default the current one, v3.1 (`base-sepolia.json` is v3.0). */
+export function loadDeployment(repoRoot: string, name = "base-sepolia-v3.1"): Deployment {
   return JSON.parse(readFileSync(join(repoRoot, "deployments", `${name}.json`), "utf8"));
 }
 

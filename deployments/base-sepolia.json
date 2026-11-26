@@ -7,6 +7,8 @@
     62968830
   ],
   "date": "2026-11-24",
+  "version": "v3.0.0-testnet",
+  "supersededBy": "base-sepolia-v3.1.json (v3.1.0-testnet): its contracts check the adapter's answer by the gas it used (docs/known-issues/2026-11-out-of-gas-as-invalid.md). These contracts and entries stay on chain unchanged; ProofValidator8004 here stays in use until v3.1's is deployed.",
   "contracts": {
     "VerifierRegistry": "0xc754b4d635a1f4C67Bb09156aE078f648ae06cF1",
     "Halo2EzklAdapter": "0x070d8A6485ea5a813E949FeB57BCE9b2d35a64a5",

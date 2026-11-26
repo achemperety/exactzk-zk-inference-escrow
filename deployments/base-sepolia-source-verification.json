@@ -197,5 +197,113 @@
         "lookup": "https://sourcify.dev/server/v2/contract/84532/0x039e3fFd1778bb91be2961b09999FDf58EcF68Ab"
       }
     }
+  },
+  "v3.1": {
+    "checked": "2026-11-26",
+    "deployment": "base-sepolia-v3.1.json",
+    "summary": "The five contracts v3.1 deployed are verified on both explorers at the same level as v3.0's: 'match' on Sourcify (creation and runtime), 'partially verified' on Blockscout, the ceiling for code built without CBOR metadata. They were submitted with forge verify-contract to Sourcify, then to Blockscout; Blockscout already listed four of them after the Sourcify submission and verified AuthCaptureProofOperator itself. The registry and the two verifiers are v3.0's (above). The evmVersion is prague because solc 0.8.28 has no osaka target (foundry.toml).",
+    "contracts": {
+      "Halo2EzklAdapterV2": {
+        "address": "0x27B9c857d3a5C1c7C2Cd7ED2FCcFf49a738293Fa",
+        "blockscout": {
+          "status": "partially verified",
+          "via": [
+            "imported after the Sourcify verification"
+          ],
+          "verifiedAt": "2026-11-26T22:14:58Z",
+          "compiler": "solc 0.8.28+commit.7893614a, optimizer 1,000,000 runs, evmVersion prague",
+          "sources": "equal to this repository at e1beaa7 and the pinned submodules (2 files)",
+          "lookup": "https://base-sepolia.blockscout.com/address/0x27B9c857d3a5C1c7C2Cd7ED2FCcFf49a738293Fa?tab=contract"
+        },
+        "sourcify": {
+          "match": "match",
+          "creationMatch": "match",
+          "runtimeMatch": "match",
+          "verifiedAt": "2026-11-26T22:14:37Z",
+          "lookup": "https://sourcify.dev/server/v2/contract/84532/0x27B9c857d3a5C1c7C2Cd7ED2FCcFf49a738293Fa"
+        }
+      },
+      "SoloSettlement": {
+        "address": "0x124b0C1E720b11888aA3F346AAD313F18A91fd49",
+        "blockscout": {
+          "status": "partially verified",
+          "via": [
+            "imported after the Sourcify verification"
+          ],
+          "verifiedAt": "2026-11-26T22:15:13Z",
+          "compiler": "solc 0.8.28+commit.7893614a, optimizer 1,000,000 runs, evmVersion prague",
+          "sources": "equal to this repository at e1beaa7 and the pinned submodules (5 files)",
+          "lookup": "https://base-sepolia.blockscout.com/address/0x124b0C1E720b11888aA3F346AAD313F18A91fd49?tab=contract"
+        },
+        "sourcify": {
+          "match": "match",
+          "creationMatch": "match",
+          "runtimeMatch": "match",
+          "verifiedAt": "2026-11-26T22:15:00Z",
+          "lookup": "https://sourcify.dev/server/v2/contract/84532/0x124b0C1E720b11888aA3F346AAD313F18A91fd49"
+        }
+      },
+      "ChannelSettlement": {
+        "address": "0x3e5c4618b452b4b10B2dCe71B7566279C47c6326",
+        "blockscout": {
+          "status": "partially verified",
+          "via": [
+            "imported after the Sourcify verification"
+          ],
+          "verifiedAt": "2026-11-26T22:15:56Z",
+          "compiler": "solc 0.8.28+commit.7893614a, optimizer 1,000,000 runs, evmVersion prague",
+          "sources": "equal to this repository at e1beaa7 and the pinned submodules (13 files)",
+          "lookup": "https://base-sepolia.blockscout.com/address/0x3e5c4618b452b4b10B2dCe71B7566279C47c6326?tab=contract"
+        },
+        "sourcify": {
+          "match": "match",
+          "creationMatch": "match",
+          "runtimeMatch": "match",
+          "verifiedAt": "2026-11-26T22:15:19Z",
+          "lookup": "https://sourcify.dev/server/v2/contract/84532/0x3e5c4618b452b4b10B2dCe71B7566279C47c6326"
+        }
+      },
+      "ProofEvaluator8183": {
+        "address": "0x9a9eFa2F42Dd72e7C479ee8530BF5f9561033b99",
+        "blockscout": {
+          "status": "partially verified",
+          "via": [
+            "imported after the Sourcify verification"
+          ],
+          "verifiedAt": "2026-11-26T22:15:46Z",
+          "compiler": "solc 0.8.28+commit.7893614a, optimizer 1,000,000 runs, evmVersion prague",
+          "sources": "equal to this repository at e1beaa7 and the pinned submodules (14 files)",
+          "lookup": "https://base-sepolia.blockscout.com/address/0x9a9eFa2F42Dd72e7C479ee8530BF5f9561033b99?tab=contract"
+        },
+        "sourcify": {
+          "match": "match",
+          "creationMatch": "match",
+          "runtimeMatch": "match",
+          "verifiedAt": "2026-11-26T22:15:35Z",
+          "lookup": "https://sourcify.dev/server/v2/contract/84532/0x9a9eFa2F42Dd72e7C479ee8530BF5f9561033b99"
+        }
+      },
+      "AuthCaptureProofOperator": {
+        "address": "0x2a39F47F77c371e46744c6435f11E16FBD36B140",
+        "blockscout": {
+          "status": "partially verified",
+          "via": [
+            "eth-bytecode-db",
+            "Verifier Alliance"
+          ],
+          "verifiedAt": "2026-11-26T22:16:19Z",
+          "compiler": "solc 0.8.28+commit.7893614a, optimizer 1,000,000 runs, evmVersion prague",
+          "sources": "equal to this repository at e1beaa7 and the pinned submodules (6 files)",
+          "lookup": "https://base-sepolia.blockscout.com/address/0x2a39F47F77c371e46744c6435f11E16FBD36B140?tab=contract"
+        },
+        "sourcify": {
+          "match": "match",
+          "creationMatch": "match",
+          "runtimeMatch": "match",
+          "verifiedAt": "2026-11-26T22:15:52Z",
+          "lookup": "https://sourcify.dev/server/v2/contract/84532/0x2a39F47F77c371e46744c6435f11E16FBD36B140"
+        }
+      }
+    }
   }
 }

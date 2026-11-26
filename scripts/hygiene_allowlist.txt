@@ -113,6 +113,26 @@ hash 0xb906fd866d6dafa06ef67bb706a895611c199d4401a21d80250430f24d9dbcc3  # Base 
 hash 0xc5190aa38691eaf655138341988324cad41bc146f0495494b116fa9e5cefde73  # Base Sepolia transaction: settleBatch, first
 hash 0x771d3e2c4bd4e7f0d0018543aa0a786e3a9ad2b23673c4e5b4cff3611740913a  # Base Sepolia transaction: settleBatch, steady
 
+# ── Testnet transactions: the v3.1 deployment (deployments/base-sepolia-v3.1.json) ──
+hash 0xc1763ca1047d6eac9ceb367c7daa3c22b1308c9022f7285b12584d666766908c  # Base Sepolia transaction, v3.1 deployment: Halo2EzklAdapterV2
+hash 0x4c63065a7c45b21d07b32738f3c7114234292a48c7288b59a1e34a087f7a84fc  # Base Sepolia transaction, v3.1 deployment: register solo, verifyGas 645,000
+hash 0xafc0e6d42412ddec680fb3d9f928da0834864fd52fdb7ebe60593619b0e19a39  # Base Sepolia transaction, v3.1 deployment: register K=8, verifyGas 712,000
+hash 0x94001a0d4c0fe1201c461a1836fdfda99eea3bed1e8f5ba82539901094095ee1  # Base Sepolia transaction, v3.1 deployment: SoloSettlement
+hash 0xe1b4e3bec0a7dfeb24c85053a510a8d4965d2fdfcdae8f5663c05d0db6d19031  # Base Sepolia transaction, v3.1 deployment: ChannelSettlement
+hash 0xfe33d7cd598c7a53194459198d96efd0761065c35c25b78c02dc38a8294689bb  # Base Sepolia transaction, v3.1 deployment: seed SoloSettlement, 1 unit of USDC
+hash 0xd24e12ed37c59b30b7a2bbc11ae3428fc95c6171008c5fac62955f8c800b5b05  # Base Sepolia transaction, v3.1 deployment: seed ChannelSettlement, 1 unit of USDC
+hash 0x54b81a057c96be23a53bb357c47915ddb986d45bd4f0b9fa53882b6a41014866  # Base Sepolia transaction, v3.1 deployment: ProofEvaluator8183
+hash 0xf9de578d829c3fe29c8e6387054247932e997a3783b28caa97c10f8b20b42433  # Base Sepolia transaction, v3.1 deployment: AuthCaptureProofOperator
+
+# ── Testnet transactions (measurements/2026-11-26-testnet-v3.1/README.md) ────
+hash 0xd0078e7cabb81264623db8c2970af7e1dc34c5b2841db40a4c19ce1539b7ac97  # Base Sepolia transaction, v3.1: settle, the contract's first payment
+hash 0xd01f4be4fe808b6bc07ef4ef0e94bec2cc989737c25f3e8c32011116ab566f18  # Base Sepolia transaction, v3.1: settle, steady
+hash 0x947d56898e5f8e91028fea0dcc7b18dae3994ece2bf758c0cac1b1fe57554b28  # Base Sepolia transaction, v3.1: open
+hash 0x6cc19080e5606ec230e5c105e28e0746a9ebeaa8d57b95dee742bed5016074ac  # Base Sepolia transaction, v3.1: release
+hash 0x3bd7d6f85607144817cd447a753ab3f5283bcc9ab0c8f5f765dd8b172d886729  # Base Sepolia transaction, v3.1: openChannel
+hash 0x08f3ca6395e11052a2e24cc74b8b338f0abc717a9c9ef5e1062ac3bcc79f0e95  # Base Sepolia transaction, v3.1: settleBatch, first
+hash 0x7d190953625a188e2f720c07e705172e46c44002ccae59f0835390ebfb1f1984  # Base Sepolia transaction, v3.1: settleBatch, steady
+
 # ── Keywords ────────────────────────────────────────────────────────────────
 kw private_key circuits/spike-mlp/*.py  # variable and argument name; the value is Anvil default key 0
 kw private_key measurements/*/*.py      # argument name; the value is an Anvil default key
@@ -150,6 +170,7 @@ kw basescan clients/ts/*  # the testnet explorer's link to a transaction, printe
 kw sepolia clients/python/*  # the middleware's usage names the testnet deployment record
 kw sepolia MEASUREMENTS.md  # names the testnet of the deployment and of the fork the USDC rows were measured on
 kw sepolia measurements/2026-11-24-testnet/README.md  # gas of transactions on the testnet; names its public endpoint
+kw sepolia measurements/2026-11-26-testnet-v3.1/README.md  # gas of transactions on the testnet; names its public endpoint
 hash 0xbfc219d647efafebb7db189aa5b4f35703e4fbb226ff9ba9b9b907c56b1f84cf  # keccak256 of the Halo2EzklAdapter runtime bytecode, as registered in both testnet entries
 hash 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470  # keccak256 of the empty string (Keccak test vector)
 hash 0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45  # keccak256("abc") (Keccak test vector)

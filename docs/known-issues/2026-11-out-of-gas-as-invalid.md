@@ -14,7 +14,7 @@ The cost of a verification is set by the chain's gas schedule, and hard forks ch
 
 ## Base Sepolia already prices it this way
 
-Checked 2026-11-27, Base Sepolia block 63,995,885. A gauge contract injected with an `eth_call` state override measured one call of the deployed solo verifier with the fixture proof: 580,176 gas. The same gauge on local Anvil nodes with the same runtime code gave 580,176 under Osaka and 572,079 under Prague. Each figure includes the gauge's own call, including the first-touch charge for the verifier's account. The difference is the 8,097 above. So the entries' headroom below is the headroom on the chain today.
+Checked 2026-11-26 (UTC), Base Sepolia block 63,995,885. A gauge contract injected with an `eth_call` state override measured one call of the deployed solo verifier with the fixture proof: 580,176 gas. The same gauge on local Anvil nodes with the same runtime code gave 580,176 under Osaka and 572,079 under Prague. Each figure includes the gauge's own call, including the first-touch charge for the verifier's account. The difference is the 8,097 above. So the entries' headroom below is the headroom on the chain today.
 
 ## Affected entries
 
@@ -95,7 +95,7 @@ Not redeployed:
 
 The `v3.0.0-testnet` contracts keep their own check. They can also use the new entries, because every one of them takes the verifier id per payment, job, request or channel. With the new entries a valid proof no longer runs short of gas there either. Those contracts still read `TargetGasExhausted` and any other failure as `Invalid`, as before.
 
-## Deployment on Base Sepolia (prepared, not run)
+## Deployment on Base Sepolia
 
 `script/DeployV31BaseSepolia.s.sol` reads the v3.0 registry and verifiers from [deployments/base-sepolia.json](../../deployments/base-sepolia.json). Before it sends anything, it checks the chain as the v3.0 script did:
 
@@ -117,7 +117,7 @@ forge script script/DeployV31BaseSepolia.s.sol --sig "runV31()" --rpc-url <rpc> 
 forge script script/DeployV31BaseSepolia.s.sol --sig "runV31Validator()" --rpc-url <rpc> --account <keystore> --broadcast --slow
 ```
 
-**Rehearsal, 2026-11-27.** On a local fork of Base Sepolia (block 64,015,747), sent from the v3.0 deployer's address with Anvil's impersonation, nothing sent to the chain. All 10 transactions succeeded, 8,454,955 gas:
+**Rehearsal, 2026-11-26.** On a local fork of Base Sepolia (block 64,015,747), sent from the v3.0 deployer's address with Anvil's impersonation, nothing sent to the chain. All 10 transactions succeeded, 8,454,955 gas:
 
 | # | Transaction | Gas |
 |---:|---|---:|
@@ -132,17 +132,19 @@ forge script script/DeployV31BaseSepolia.s.sol --sig "runV31Validator()" --rpc-u
 | 9 | `ProofValidator8004` (second step) | 950,142 |
 | 10 | `AuthCaptureProofOperator` | 1,568,015 |
 
-Without the validator, the first step is 9 transactions and 7,504,813 gas. Its dry run against the chain itself on 2026-11-27 passed every preflight check: forge estimated 9,808,253 gas at 0.0101 gwei, 0.000099 ETH. An earlier dry run of all ten transactions, with gas limits of 11,043,437 in total (forge's 1.3 margin), also passed. Both estimates are before the L1 data fee. The v3.0 deployment, 16.9 million gas, cost 0.000101 ETH in all. The v3.0 deployer holds enough ETH and USDC.
+Without the validator, the first step is 9 transactions and 7,504,813 gas. Its dry run against the chain itself passed every preflight check: forge estimated 9,808,253 gas at 0.0101 gwei, 0.000099 ETH. An earlier dry run of all ten transactions, with gas limits of 11,043,437 in total (forge's 1.3 margin), also passed. Both estimates are before the L1 data fee. The v3.0 deployment, 16.9 million gas, cost 0.000101 ETH in all. The v3.0 deployer holds enough ETH and USDC.
 
-The new ids:
+**Deployed, 2026-11-26 (UTC).** `runV31()` was broadcast from main at `e1beaa7`. It sent 9 transactions in Base Sepolia blocks 64,043,944 to 64,043,988, all succeeded, and they used 7,504,813 gas, as rehearsed. The cost was 0.0000392 ETH, including 0.0000011 ETH of L1 data fees. Addresses, ids and transaction hashes are in [deployments/base-sepolia-v3.1.json](../../deployments/base-sepolia-v3.1.json). The new ids:
 
-- solo `0x660e857f…c1e1`
-- K=8 `0x81e1e628…c286`
+- solo `0x660e857f27694c13851bfd3b8558b8a8e7e76d5fc48b3b31f60f8fa3f086c1e1`, `verifyGas` 645,000
+- K=8 `0x81e1e6281df75ff6da92568a8f6448aa11150fed22cbf5396465a764cc83c286`, `verifyGas` 712,000
 
-**After the deployment:**
+Checked after the deployment:
 
-1. Record the new addresses and ids in `deployments/` as a v3.1 section next to v3.0's.
-2. Verify the new contracts on Sourcify and Blockscout, as for v3.0.
-3. Re-measure the figures in `MEASUREMENTS.md` on the 3.1 code.
-4. Point the quickstart and the client's known verifier ids at the new entries.
-5. Tag `v3.1.0-testnet`.
+- **The deployed code is main's.** Each creation transaction's input is the build of `e1beaa7` followed by the expected constructor arguments. Each contract's code on chain equals what that input returns when it is run against the block before.
+- **The new entries name the v3.0 verifiers.** Each has the same lanes, output size, verifier address, verifier code hash and key hash as the v3.0 entry for the same circuit. Only the adapter and the allowance differ. The v3.0 entries still exist, and each settlement contract holds its one-unit seed.
+- **Sources verified.** All five new contracts match on Sourcify, creation and runtime. Blockscout lists them as partially verified, the ceiling for code built without metadata, as for v3.0. Their sources there equal `e1beaa7` and the pinned submodules, byte for byte ([deployments/base-sepolia-source-verification.json](../../deployments/base-sepolia-source-verification.json)).
+- **Re-measured** on the testnet and locally: [measurements/2026-11-26-testnet-v3.1/](../../measurements/2026-11-26-testnet-v3.1/README.md) and [MEASUREMENTS.md](../../MEASUREMENTS.md). Each verification costs 44 gas more in the adapter and 49 to 69 more in the check.
+- **The TypeScript client and the quickstart** now load the v3.1 deployment by default (`clients/ts/src/chain.ts`). The scripts under `scripts/` and the Python client still use v3.0's `deployments/base-sepolia.json` by default; its entries remain valid.
+
+Still to come: `ProofValidator8004`, the second step, `runV31Validator()`. Until it is deployed, the `v3.0.0-testnet` validator stays in use.

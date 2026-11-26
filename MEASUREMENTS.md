@@ -2,7 +2,35 @@
 
 Every gas figure of version 3, next to the previous version's figure for the same job where one exists. Re-run on the final code on 2026-11-24. Method, breakdowns and the tests behind each row are in the folders under `measurements/`. The testnet rows are receipts from Base Sepolia, each with its transaction hash in `measurements/2026-11-24-testnet/`.
 
-**Version 3.1, not yet deployed.** The figures below are those of `v3.0.0-testnet`. Version 3.1 ([docs/known-issues/2026-11-out-of-gas-as-invalid.md](docs/known-issues/2026-11-out-of-gas-as-invalid.md)) classifies the adapter's answer by the gas it used, and its entries use `Halo2EzklAdapterV2`. The tests that pin these figures were updated to the 3.1 code: each execution figure of the channel sweep rose by 69 gas, its calldata figures moved by −36 to +24 with the adapter's address in the entry, and the K=16 steady batch is 1,137,131 (+81; 1,137,050 below). Every figure will be re-measured with the 3.1 deployment.
+## Version 3.1 (`v3.1.0-testnet`)
+
+Version 3.1 fixes [docs/known-issues/2026-11-out-of-gas-as-invalid.md](docs/known-issues/2026-11-out-of-gas-as-invalid.md). It was deployed on Base Sepolia on 2026-11-26 (`deployments/base-sepolia-v3.1.json`) and re-measured on the testnet and locally the same day (`measurements/2026-11-26-testnet-v3.1/`). Each proof verification costs a little more:
+
+- **44 gas in `Halo2EzklAdapterV2`.** It records the gas it had before calling the verifier.
+- **49 to 69 gas in the check.** It classifies the adapter's answer by the gas the adapter used. It is 49 in `SoloSettlement` and 69 in `ChannelSettlement`.
+
+Nothing else changed: the verifier's own figures are identical.
+
+| Job | v3.0 | v3.1 | Where |
+|---|---:|---:|---|
+| One-transaction `settle`, USDC, steady | 766,226 | **766,295** | testnet |
+| Escrow `open` + `release`, USDC, steady | 839,705 | **839,798** | testnet |
+| K=8 batch, one channel, steady | 860,315 | **860,404** | testnet |
+| K=8 batch, one channel, the provider's first accrual in the channel | 877,463 | **877,564** | testnet |
+| `settle`, USDC, steady | 768,174 | **768,267** | local |
+| K=8 batch, one channel, steady | 860,957 | **861,094** | local |
+| K=8 batch, eight channels, steady | 909,289 | **909,342** (113,667.8 per request) | local |
+| K=16 batch, sixteen channels, steady | 1,137,050 | **1,137,131** (71,070.7 per request) | local |
+| `authorize` + `captureWithProof`, USDC | 895,250 | **895,352** | local |
+| `authorize` + `captureWithPolicy`, USDC | 899,361 | **899,410** | local |
+| ERC-8183 `evaluate`, test token, steady | 769,085 | **769,173** | local |
+| `batch-settlement` claim gate, one claim, steady | 793,491 | **793,587** | local, test token |
+
+The rest of this file is unchanged: its figures are those of `v3.0.0-testnet`, measured on 2026-11-24. Under 3.1 the figures that verify a proof are higher by 49 to 137 gas in the rows above. On the testnet, where the receipts were broken down, execution is 93 to 113 higher. The rest is call data, which changes with the entry the transaction carries (the new adapter's address and allowance). Of the transactions that verify nothing, `open` is identical on the testnet and `openChannel` is 20 gas higher in execution, which was not broken down. The tests that pin figures were updated to the 3.1 code, as follows:
+
+- each execution figure of the channel sweep rose by 69 gas;
+- its call data figures moved by −36 to +24, with the adapter's address in the entry;
+- the K=16 steady batch is 1,137,131 (+81).
 
 ## How the figures were taken
 

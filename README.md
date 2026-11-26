@@ -61,20 +61,20 @@ From the published solo input (`circuits/spike-mlp/run_t3_k5_nonces/input.json`)
 
 ## Numbers
 
-Gas under the Osaka schedule. "Testnet" figures are Base Sepolia receipts; "local" figures are `forge test` with the method in [MEASUREMENTS.md](MEASUREMENTS.md), which also has the previous version's figures, the first-time rows and the breakdowns.
+Gas under the Osaka schedule, version 3.1. "Testnet" figures are Base Sepolia receipts; "local" figures are `forge test` with the method in [MEASUREMENTS.md](MEASUREMENTS.md), which also has the previous version's figures, the first-time rows and the breakdowns. Version 3.1 fixes a known issue, a valid proof whose verifier ran short of gas read as invalid ([docs/known-issues/2026-11-out-of-gas-as-invalid.md](docs/known-issues/2026-11-out-of-gas-as-invalid.md)); each verification costs 93 to 113 gas more execution than in 3.0.
 
 | What | Figure | Where | Source |
 |---|---:|---|---|
-| One-transaction `settle`, USDC, steady | 766,226 gas | testnet | `measurements/2026-11-24-testnet/` |
-| The same | 768,174 gas | local | `test/SoloSettlementFork.t.sol` |
-| Escrow `open` + `release`, USDC, steady | 839,705 gas | testnet | `measurements/2026-11-24-testnet/` |
-| K=8 batch from one channel, steady | 860,315 gas | testnet | the same |
-| K=8 batch, eight channels, steady | 909,289 gas, 113,661 per request | local | `test/ChannelSettlementGas.t.sol` |
-| K=16 batch, sixteen channels, steady, real proof | 1,137,050 gas, 71,066 per request (previous version: 96,401) | local | `test/ChannelSettlementK16Gas.t.sol` |
-| x402 `auth-capture`: `authorize` + `captureWithProof`, USDC | 895,250 gas | local | `test/AuthCaptureGas.t.sol` |
-| x402 `auth-capture`, proof policy: `authorize` + `captureWithPolicy`, USDC | 899,361 gas | local | `test/ProofCapturePolicyGas.t.sol` |
-| x402 `batch-settlement` claim gate (prototype): one claim, steady, payee paid in the claim | 793,491 gas | local, test token | `test/experimental/batch-gate/ProofClaimGate.t.sol` |
-| ERC-8183 `evaluate`, test token, steady | 769,085 gas | local | `test/StandardsGas.t.sol` |
+| One-transaction `settle`, USDC, steady | 766,295 gas | testnet | `measurements/2026-11-26-testnet-v3.1/` |
+| The same | 768,267 gas | local | `test/SoloSettlementFork.t.sol` |
+| Escrow `open` + `release`, USDC, steady | 839,798 gas | testnet | `measurements/2026-11-26-testnet-v3.1/` |
+| K=8 batch from one channel, steady | 860,404 gas | testnet | the same |
+| K=8 batch, eight channels, steady | 909,342 gas, 113,668 per request | local | `test/ChannelSettlementGas.t.sol` |
+| K=16 batch, sixteen channels, steady, real proof | 1,137,131 gas, 71,071 per request (previous version: 96,401) | local | `test/ChannelSettlementK16Gas.t.sol` |
+| x402 `auth-capture`: `authorize` + `captureWithProof`, USDC | 895,352 gas | local | `test/AuthCaptureGas.t.sol` |
+| x402 `auth-capture`, proof policy: `authorize` + `captureWithPolicy`, USDC | 899,410 gas | local | `test/ProofCapturePolicyGas.t.sol` |
+| x402 `batch-settlement` claim gate (prototype): one claim, steady, payee paid in the claim | 793,587 gas | local, test token | `test/experimental/batch-gate/ProofClaimGate.t.sol` |
+| ERC-8183 `evaluate`, test token, steady | 769,173 gas | local | `test/StandardsGas.t.sol` |
 | Of a solo settlement: the generated verifier | 577,544 gas | local | `test/FixtureBaseline.t.sol` |
 | Solo proof, canonical keys | 20.10 s, 1,393 MB | 2 vCPUs of an Intel Xeon Gold 5220R | `measurements/2026-11-24-prover/` |
 | Groth16 prototype `settle`, test token (EXPERIMENTAL: single-party setup; Poseidon2 commitment, not the same statement) | 372,965 gas | local | `measurements/experimental/groth16/` |
@@ -100,7 +100,7 @@ In plain words:
 
 - **Same circuits.** The two pinned circuits, their verifying keys and their verifier bytecode are byte-identical to the ones used before version 3. A circuit's identity is its model files, its pinned `settings.json` and its SRS: settings regenerated from the same model can give another key. Their hashes are in [circuits/spike-mlp/MANIFEST.md](circuits/spike-mlp/MANIFEST.md), and every carried-over file is listed with its SHA-256 in [provenance/](provenance/README.md).
 - **New settlement contracts**, written from scratch in `src/`.
-- **New addresses.** Version 3 is deployed on Base Sepolia from a fresh testnet-only account, by `script/DeployBaseSepolia.s.sol` from the sources in this repository ([docs/deployment-notes.md](docs/deployment-notes.md)); the addresses are in [deployments/base-sepolia.json](deployments/base-sepolia.json), and `scripts/check_deployment.py` checks them against the chain. A verifier is identified by key hash and code hash, not by address, so the same circuit has the same identifier wherever the same bytecode is deployed.
+- **New addresses.** Version 3 is deployed on Base Sepolia from a fresh testnet-only account, by `script/DeployBaseSepolia.s.sol` from the sources in this repository ([docs/deployment-notes.md](docs/deployment-notes.md)); the addresses are in [deployments/base-sepolia.json](deployments/base-sepolia.json), and `scripts/check_deployment.py` checks them against the chain. Version 3.1 (`script/DeployV31BaseSepolia.s.sol`) supersedes it: [deployments/base-sepolia-v3.1.json](deployments/base-sepolia-v3.1.json) has its adapter, its two entries in the same registry, and new versions of the contracts that check a proof. The v3.0 contracts and entries stay on chain unchanged; v3.1's `ProofValidator8004` is deployed in a second step, and until then v3.0's stays in use. A verifier is identified by key hash and code hash, not by address, so the same circuit has the same identifier wherever the same bytecode is deployed.
 
 ## What is here
 

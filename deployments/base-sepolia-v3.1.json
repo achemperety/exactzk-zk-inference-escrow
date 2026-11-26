@@ -1,0 +1,89 @@
+{
+  "network": "Base Sepolia",
+  "chainId": 84532,
+  "version": "v3.1.0-testnet",
+  "commit": "e1beaa78b47ce1b7a47720f98f2155c0d322cf27",
+  "blocks": [
+    64043944,
+    64043988
+  ],
+  "date": "2026-11-26",
+  "supersedes": "base-sepolia.json (v3.0.0-testnet)",
+  "note": "Deployed by script/DeployV31BaseSepolia.s.sol, runV31(), from the same testnet-only account as v3.0 (docs/known-issues/2026-11-out-of-gas-as-invalid.md). The registry and the two EZKL verifiers are v3.0's, reused; the two entries below were added to that registry. ProofValidator8004 is not part of this step: until runV31Validator() deploys it, the v3.0 validator in base-sepolia.json stays in use.",
+  "contracts": {
+    "VerifierRegistry": "0xc754b4d635a1f4C67Bb09156aE078f648ae06cF1",
+    "Halo2EzklAdapterV2": "0x27B9c857d3a5C1c7C2Cd7ED2FCcFf49a738293Fa",
+    "soloVerifier": "0x86e3aED8A2c3f12b5CF87CD473212483c7229632",
+    "k8Verifier": "0x6430e833F537Ddd1cF476E976EC9e7e0ef7238e1",
+    "SoloSettlement": "0x124b0C1E720b11888aA3F346AAD313F18A91fd49",
+    "ChannelSettlement": "0x3e5c4618b452b4b10B2dCe71B7566279C47c6326",
+    "ProofEvaluator8183": "0x9a9eFa2F42Dd72e7C479ee8530BF5f9561033b99",
+    "AuthCaptureProofOperator": "0x2a39F47F77c371e46744c6435f11E16FBD36B140"
+  },
+  "verifierIds": {
+    "solo": "0x660e857f27694c13851bfd3b8558b8a8e7e76d5fc48b3b31f60f8fa3f086c1e1",
+    "k8": "0x81e1e6281df75ff6da92568a8f6448aa11150fed22cbf5396465a764cc83c286"
+  },
+  "pending": {
+    "ProofValidator8004": "second step, script/DeployV31BaseSepolia.s.sol runV31Validator(); not deployed yet"
+  },
+  "transactions": [
+    {
+      "what": "Halo2EzklAdapterV2",
+      "hash": "0xc1763ca1047d6eac9ceb367c7daa3c22b1308c9022f7285b12584d666766908c",
+      "block": 64043944,
+      "gasUsed": 364033
+    },
+    {
+      "what": "register solo, verifyGas 645,000",
+      "hash": "0x4c63065a7c45b21d07b32738f3c7114234292a48c7288b59a1e34a087f7a84fc",
+      "block": 64043948,
+      "gasUsed": 171913
+    },
+    {
+      "what": "register K=8, verifyGas 712,000",
+      "hash": "0xafc0e6d42412ddec680fb3d9f928da0834864fd52fdb7ebe60593619b0e19a39",
+      "block": 64043952,
+      "gasUsed": 171925
+    },
+    {
+      "what": "SoloSettlement",
+      "hash": "0x94001a0d4c0fe1201c461a1836fdfda99eea3bed1e8f5ba82539901094095ee1",
+      "block": 64043956,
+      "gasUsed": 1219729
+    },
+    {
+      "what": "ChannelSettlement",
+      "hash": "0xe1b4e3bec0a7dfeb24c85053a510a8d4965d2fdfcdae8f5663c05d0db6d19031",
+      "block": 64043961,
+      "gasUsed": 2650420
+    },
+    {
+      "what": "seed SoloSettlement, 1 unit of USDC",
+      "hash": "0xfe33d7cd598c7a53194459198d96efd0761065c35c25b78c02dc38a8294689bb",
+      "block": 64043970,
+      "gasUsed": 62135
+    },
+    {
+      "what": "seed ChannelSettlement, 1 unit of USDC",
+      "hash": "0xd24e12ed37c59b30b7a2bbc11ae3428fc95c6171008c5fac62955f8c800b5b05",
+      "block": 64043979,
+      "gasUsed": 62135
+    },
+    {
+      "what": "ProofEvaluator8183",
+      "hash": "0x54b81a057c96be23a53bb357c47915ddb986d45bd4f0b9fa53882b6a41014866",
+      "block": 64043983,
+      "gasUsed": 1234508
+    },
+    {
+      "what": "AuthCaptureProofOperator",
+      "hash": "0xf9de578d829c3fe29c8e6387054247932e997a3783b28caa97c10f8b20b42433",
+      "block": 64043988,
+      "gasUsed": 1568015
+    }
+  ],
+  "gasUsed": 7504813,
+  "costWei": 39197392429551,
+  "l1FeeWei": 1087542311377
+}
