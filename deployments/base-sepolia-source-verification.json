@@ -1,20 +1,201 @@
 {
   "network": "Base Sepolia",
   "chainId": 84532,
-  "checked": "2026-11-25",
+  "checked": "2026-11-26",
+  "summary": "All nine contracts are verified on Blockscout and on Sourcify at the best level either allows. Both report a partial match ('partially verified' on Blockscout, 'match' on Sourcify) and none can report a full or exact one: the seven project contracts are compiled without CBOR metadata (foundry.toml: bytecode_hash none, cbor_metadata false), so there is no metadata hash to match; the two verifiers are EZKL's generated runtime bytes deployed behind an 11-byte copy prefix (script/DeployBaseSepolia.s.sol, RAW_RUNTIME_PREFIX), so only their runtime code can match, and their metadata hash comes from EZKL's own build, whose source paths are not recorded. No contract was redeployed.",
+  "verifiers": "On 2026-11-26 Blockscout's own verifier refused both verifiers (standard JSON input, solc 0.8.20, optimizer 1 run: 'Fail - Unable to verify'), because it matches the creation input, which is the copy prefix followed by the runtime, not compiled creation code. Locally, that compilation's runtime code equals the on-chain code of both verifiers once the CBOR metadata is removed (17,992 and 17,990 bytes). Blockscout's Sourcify method then imported Sourcify's runtime match for both.",
   "contracts": {
+    "VerifierRegistry": {
+      "address": "0xc754b4d635a1f4C67Bb09156aE078f648ae06cF1",
+      "blockscout": {
+        "status": "partially verified",
+        "via": [
+          "eth-bytecode-db",
+          "Verifier Alliance"
+        ],
+        "verifiedAt": "2026-11-24T18:24:49Z",
+        "compiler": "solc 0.8.28+commit.7893614a, optimizer 1,000,000 runs, evmVersion prague",
+        "sources": "equal to this repository at tag v3.0.0-testnet and the pinned submodules",
+        "lookup": "https://base-sepolia.blockscout.com/address/0xc754b4d635a1f4C67Bb09156aE078f648ae06cF1?tab=contract"
+      },
+      "sourcify": {
+        "match": "match",
+        "creationMatch": "match",
+        "runtimeMatch": "match",
+        "verifiedAt": "2026-11-24T18:21:09Z",
+        "lookup": "https://sourcify.dev/server/v2/contract/84532/0xc754b4d635a1f4C67Bb09156aE078f648ae06cF1"
+      }
+    },
+    "Halo2EzklAdapter": {
+      "address": "0x070d8A6485ea5a813E949FeB57BCE9b2d35a64a5",
+      "blockscout": {
+        "status": "partially verified",
+        "via": [
+          "eth-bytecode-db",
+          "Verifier Alliance"
+        ],
+        "verifiedAt": "2026-11-24T18:30:49Z",
+        "compiler": "solc 0.8.28+commit.7893614a, optimizer 1,000,000 runs, evmVersion prague",
+        "sources": "equal to this repository at tag v3.0.0-testnet and the pinned submodules",
+        "lookup": "https://base-sepolia.blockscout.com/address/0x070d8A6485ea5a813E949FeB57BCE9b2d35a64a5?tab=contract"
+      },
+      "sourcify": {
+        "match": "match",
+        "creationMatch": "match",
+        "runtimeMatch": "match",
+        "verifiedAt": "2026-11-24T18:22:50Z",
+        "lookup": "https://sourcify.dev/server/v2/contract/84532/0x070d8A6485ea5a813E949FeB57BCE9b2d35a64a5"
+      }
+    },
+    "soloVerifier": {
+      "address": "0x86e3aED8A2c3f12b5CF87CD473212483c7229632",
+      "blockscout": {
+        "status": "partially verified",
+        "via": [
+          "Sourcify import"
+        ],
+        "verifiedAt": "2026-11-26T18:39:12Z",
+        "compiler": "solc 0.8.20+commit.a1b79de6, optimizer 1 runs, evmVersion shanghai",
+        "sources": "circuits/spike-mlp/run_t3_k5_nonces/Halo2Verifier.sol, byte for byte",
+        "lookup": "https://base-sepolia.blockscout.com/address/0x86e3aED8A2c3f12b5CF87CD473212483c7229632?tab=contract",
+        "refused": "standard JSON input on 2026-11-26: Fail - Unable to verify (creation input is the copy prefix and runtime)"
+      },
+      "sourcify": {
+        "match": "match",
+        "creationMatch": null,
+        "runtimeMatch": "match",
+        "verifiedAt": "2026-11-24T18:31:54Z",
+        "lookup": "https://sourcify.dev/server/v2/contract/84532/0x86e3aED8A2c3f12b5CF87CD473212483c7229632"
+      }
+    },
+    "k8Verifier": {
+      "address": "0x6430e833F537Ddd1cF476E976EC9e7e0ef7238e1",
+      "blockscout": {
+        "status": "partially verified",
+        "via": [
+          "Sourcify import"
+        ],
+        "verifiedAt": "2026-11-26T18:39:25Z",
+        "compiler": "solc 0.8.20+commit.a1b79de6, optimizer 1 runs, evmVersion shanghai",
+        "sources": "circuits/spike-mlp/run_mnist_mw_k8/Halo2Verifier_k8.sol, byte for byte",
+        "lookup": "https://base-sepolia.blockscout.com/address/0x6430e833F537Ddd1cF476E976EC9e7e0ef7238e1?tab=contract",
+        "refused": "standard JSON input on 2026-11-26: Fail - Unable to verify (creation input is the copy prefix and runtime)"
+      },
+      "sourcify": {
+        "match": "match",
+        "creationMatch": null,
+        "runtimeMatch": "match",
+        "verifiedAt": "2026-11-24T18:32:12Z",
+        "lookup": "https://sourcify.dev/server/v2/contract/84532/0x6430e833F537Ddd1cF476E976EC9e7e0ef7238e1"
+      }
+    },
+    "SoloSettlement": {
+      "address": "0x0934cC0B3Fef6d8f9F8f87f40aFCfF59f668c729",
+      "blockscout": {
+        "status": "partially verified",
+        "via": [
+          "eth-bytecode-db",
+          "Verifier Alliance"
+        ],
+        "verifiedAt": "2026-11-24T18:30:58Z",
+        "compiler": "solc 0.8.28+commit.7893614a, optimizer 1,000,000 runs, evmVersion prague",
+        "sources": "equal to this repository at tag v3.0.0-testnet and the pinned submodules",
+        "lookup": "https://base-sepolia.blockscout.com/address/0x0934cC0B3Fef6d8f9F8f87f40aFCfF59f668c729?tab=contract"
+      },
+      "sourcify": {
+        "match": "match",
+        "creationMatch": "match",
+        "runtimeMatch": "match",
+        "verifiedAt": "2026-11-24T18:23:10Z",
+        "lookup": "https://sourcify.dev/server/v2/contract/84532/0x0934cC0B3Fef6d8f9F8f87f40aFCfF59f668c729"
+      }
+    },
+    "ChannelSettlement": {
+      "address": "0x93e8E5745dB6eAb0eAC16FF2Dbfdd78A0C55c56B",
+      "blockscout": {
+        "status": "partially verified",
+        "via": [
+          "eth-bytecode-db",
+          "Verifier Alliance"
+        ],
+        "verifiedAt": "2026-11-24T18:31:01Z",
+        "compiler": "solc 0.8.28+commit.7893614a, optimizer 1,000,000 runs, evmVersion prague",
+        "sources": "equal to this repository at tag v3.0.0-testnet and the pinned submodules",
+        "lookup": "https://base-sepolia.blockscout.com/address/0x93e8E5745dB6eAb0eAC16FF2Dbfdd78A0C55c56B?tab=contract"
+      },
+      "sourcify": {
+        "match": "match",
+        "creationMatch": "match",
+        "runtimeMatch": "match",
+        "verifiedAt": "2026-11-24T18:23:28Z",
+        "lookup": "https://sourcify.dev/server/v2/contract/84532/0x93e8E5745dB6eAb0eAC16FF2Dbfdd78A0C55c56B"
+      }
+    },
     "ProofEvaluator8183": {
       "address": "0x92B1Ff082EaDCda56eE82408695429820687de39",
+      "blockscout": {
+        "status": "partially verified",
+        "via": [
+          "eth-bytecode-db",
+          "Verifier Alliance"
+        ],
+        "verifiedAt": "2026-11-24T18:31:05Z",
+        "compiler": "solc 0.8.28+commit.7893614a, optimizer 1,000,000 runs, evmVersion prague",
+        "sources": "equal to this repository at tag v3.0.0-testnet and the pinned submodules",
+        "lookup": "https://base-sepolia.blockscout.com/address/0x92B1Ff082EaDCda56eE82408695429820687de39?tab=contract"
+      },
       "sourcify": {
         "match": "match",
         "creationMatch": "match",
         "runtimeMatch": "match",
         "verifiedAt": "2026-11-24T18:23:45Z",
-        "compiler": "solc 0.8.28+commit.7893614a, via IR, optimizer 1,000,000 runs, evmVersion prague, no CBOR metadata",
-        "lookup": "https://sourcify.dev/server/v2/contract/84532/0x92B1Ff082EaDCda56eE82408695429820687de39"
+        "lookup": "https://sourcify.dev/server/v2/contract/84532/0x92B1Ff082EaDCda56eE82408695429820687de39",
+        "compiler": "solc 0.8.28+commit.7893614a, via IR, optimizer 1,000,000 runs, evmVersion prague, no CBOR metadata"
       },
       "sourcesAgainstThisRepository": "all 14 equal to tag v3.0.0-testnet; at main fd1ce61, 13 equal and src/ProofCheck.sol differs by checkOneInMemory, which the evaluator does not use",
       "runtimeAgainstThisRepository": "the main build equals the on-chain runtime code outside its 2 immutable slots, which hold the registry address"
+    },
+    "ProofValidator8004": {
+      "address": "0x493EC45c1bE94152D73757f489a4467E7DCf882A",
+      "blockscout": {
+        "status": "partially verified",
+        "via": [
+          "eth-bytecode-db",
+          "Verifier Alliance"
+        ],
+        "verifiedAt": "2026-11-24T18:31:09Z",
+        "compiler": "solc 0.8.28+commit.7893614a, optimizer 1,000,000 runs, evmVersion prague",
+        "sources": "equal to this repository at tag v3.0.0-testnet and the pinned submodules",
+        "lookup": "https://base-sepolia.blockscout.com/address/0x493EC45c1bE94152D73757f489a4467E7DCf882A?tab=contract"
+      },
+      "sourcify": {
+        "match": "match",
+        "creationMatch": "match",
+        "runtimeMatch": "match",
+        "verifiedAt": "2026-11-24T18:24:02Z",
+        "lookup": "https://sourcify.dev/server/v2/contract/84532/0x493EC45c1bE94152D73757f489a4467E7DCf882A"
+      }
+    },
+    "AuthCaptureProofOperator": {
+      "address": "0x039e3fFd1778bb91be2961b09999FDf58EcF68Ab",
+      "blockscout": {
+        "status": "partially verified",
+        "via": [
+          "eth-bytecode-db",
+          "Verifier Alliance"
+        ],
+        "verifiedAt": "2026-11-24T18:31:12Z",
+        "compiler": "solc 0.8.28+commit.7893614a, optimizer 1,000,000 runs, evmVersion prague",
+        "sources": "equal to this repository at tag v3.0.0-testnet and the pinned submodules",
+        "lookup": "https://base-sepolia.blockscout.com/address/0x039e3fFd1778bb91be2961b09999FDf58EcF68Ab?tab=contract"
+      },
+      "sourcify": {
+        "match": "match",
+        "creationMatch": "match",
+        "runtimeMatch": "match",
+        "verifiedAt": "2026-11-24T18:24:20Z",
+        "lookup": "https://sourcify.dev/server/v2/contract/84532/0x039e3fFd1778bb91be2961b09999FDf58EcF68Ab"
+      }
     }
   }
 }
