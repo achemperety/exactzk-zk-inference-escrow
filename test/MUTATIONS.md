@@ -703,6 +703,7 @@ Run on 2026-11-24 on the Mac. 19 unit tests, no EZKL and no network: Keccak test
 | VM8 | SHA-3 padding (`0x06`) instead of Keccak's (`0x01`) | 15: the vectors, the pinned hashes and every test that hashes |
 | VM9 | an unregistered entry counts as registered | 1: `test_not_registered` |
 | VM10 | the trailer is cut by its length field alone, without checking its form | 3 subtests of `test_rejects_other_forms` |
+| VM11 | the default `--deployment` is v3.0's `deployments/base-sepolia.json` again (run on 2026-11-27, with 21 tests: `test_v31_ids` and `test_the_default_deployment_is_v31` were added for the switch to v3.1) | 1: `test_the_default_deployment_is_v31` |
 
 On the server, one deliberately wrong input was run end to end: the pinned solo `settings.json` with its two range checks swapped. The script reported a different verifying key and verifier and exited 1 (`measurements/2026-11-24-verify-entry/`).
 

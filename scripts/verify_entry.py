@@ -46,6 +46,9 @@ import time
 import urllib.request
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# The current deployment, v3.1. deployments/base-sepolia.json is v3.0: its entries stay valid but carry
+# the known issue in docs/known-issues/2026-11-out-of-gas-as-invalid.md.
+DEFAULT_DEPLOYMENT = os.path.join(REPO, "deployments", "base-sepolia-v3.1.json")
 
 CIRCUITS = {
     "solo": {"dir": "circuits/spike-mlp/run_t3_k5_nonces", "model": "model.onnx", "sol": "Halo2Verifier.sol", "lanes": 1},
@@ -367,7 +370,8 @@ def main():
     p.add_argument("circuit", choices=sorted(CIRCUITS))
     p.add_argument("--from-vk", action="store_true", help="start from the pinned vk.key; no key setup")
     p.add_argument("--rpc", default="https://sepolia.base.org")
-    p.add_argument("--deployment", default=os.path.join(REPO, "deployments", "base-sepolia.json"))
+    p.add_argument("--deployment", default=DEFAULT_DEPLOYMENT,
+                   help="default: deployments/base-sepolia-v3.1.json; base-sepolia.json is v3.0")
     p.add_argument("--verifier-id", help="default: the deployment file's id for this circuit")
     p.add_argument("--settings", help="another settings.json, to see a mismatch (default: the pinned one)")
     p.add_argument("--solc", help=f"a solc {SOLC_VERSION} binary (default: download the release build)")

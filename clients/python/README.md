@@ -6,7 +6,7 @@ Python 3.10 or later, `web3` 7.14 (`requirements.txt`). The package is `exactzk_
 from web3 import Web3
 from exactzk_x402 import ProofGatedMiddleware, serve
 
-d = json.load(open("deployments/base-sepolia.json"))
+d = json.load(open("deployments/base-sepolia-v3.1.json"))  # v3.1; base-sepolia.json is v3.0
 w3 = Web3(Web3.HTTPProvider("https://sepolia.base.org"))
 mw = ProofGatedMiddleware(
     w3=w3,

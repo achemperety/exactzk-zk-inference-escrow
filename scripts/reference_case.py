@@ -10,7 +10,8 @@ The witness is what the prover would prove, so its values are the circuit's, not
 point model's: fixed point at 2^13, with the circuit's own rounding. Each input file is first
 compared with its SHA-256 in provenance/COPIED_FILES.sha256. The results are then compared with
 the published proof (clients/ts/published/solo-proof.json, the stored proof of test/fixtures/), and
-the verifier id of the solo entry is read from deployments/base-sepolia.json.
+the verifier id of the solo entry is read from deployments/base-sepolia-v3.1.json (v3.1; the v3.0
+entry in base-sepolia.json has the same circuit and another id).
 
     python3 scripts/reference_case.py [--json <file>]
 
@@ -96,7 +97,7 @@ def main():
 
     with open(os.path.join(ROOT, "clients", "ts", "published", "solo-proof.json")) as f:
         published = json.load(f)
-    with open(os.path.join(ROOT, "deployments", "base-sepolia.json")) as f:
+    with open(os.path.join(ROOT, "deployments", "base-sepolia-v3.1.json")) as f:
         deployment = json.load(f)
 
     with open(os.path.join(c, "input.json")) as f:

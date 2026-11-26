@@ -31,6 +31,16 @@ K8_ENTRY = {
     "targetCodeHash": "0x471c8109f1a03375b17ae6afd421f5857346edf92bf37fce1c7b90a3e02d7ef1",
     "vkHash": "0xdd03fb0c69e96cc02cbcc6bed8ef51665f934c01cddaf2a855bd1c7fce94675f",
 }
+# The v3.1 entries (deployments/base-sepolia-v3.1.json): the same verifiers behind Halo2EzklAdapterV2,
+# with the allowances of docs/known-issues/2026-11-out-of-gas-as-invalid.md.
+with open(os.path.join(v.REPO, "deployments", "base-sepolia-v3.1.json")) as _f:
+    V31 = json.load(_f)
+ADAPTER_V2_CODE_HASH = "0xf48a3f734689da45b258bac271c363e5f52643e387016e9c1f8aa29ae6334839"
+SOLO_ENTRY_V31 = {**SOLO_ENTRY, "adapter": V31["contracts"]["Halo2EzklAdapterV2"].lower(), "verifyGas": 645000,
+                  "adapterCodeHash": ADAPTER_V2_CODE_HASH}
+K8_ENTRY_V31 = {**K8_ENTRY, "adapter": V31["contracts"]["Halo2EzklAdapterV2"].lower(), "verifyGas": 712000,
+                "adapterCodeHash": ADAPTER_V2_CODE_HASH}
+
 # Values from circuits/spike-mlp/MANIFEST.md.
 SOLO_CODE_HASH_STRIPPED = "0xf60aad67ed7bf1b55cc6cb097b1997036617c161fbaa7f0fd80661c3bfc7b17c"
 K8_CODE_HASH_STRIPPED = "0xd0cab4041caaf77ea95fe45a29d14950be503ce26eb982af11026634112d8c67"
@@ -98,6 +108,14 @@ class Ids(unittest.TestCase):
     def test_registered_ids(self):
         self.assertEqual(v.compute_id(PROOF_SYSTEM, SOLO_ENTRY), SOLO_ID)
         self.assertEqual(v.compute_id(PROOF_SYSTEM, K8_ENTRY), K8_ID)
+
+    def test_v31_ids(self):
+        self.assertEqual(v.hx(v.compute_id(PROOF_SYSTEM, SOLO_ENTRY_V31)), V31["verifierIds"]["solo"])
+        self.assertEqual(v.hx(v.compute_id(PROOF_SYSTEM, K8_ENTRY_V31)), V31["verifierIds"]["k8"])
+
+    def test_the_default_deployment_is_v31(self):
+        self.assertTrue(v.DEFAULT_DEPLOYMENT.endswith(os.path.join("deployments", "base-sepolia-v3.1.json")))
+        self.assertEqual(V31["contracts"]["VerifierRegistry"].lower(), DEPLOYED["VerifierRegistry"])
 
     def test_every_field_but_the_addresses_is_in_the_id(self):
         changes = {"lanes": 2, "outputSize": 352, "verifyGas": 600001, "vkHash": "0x" + "11" * 32,
