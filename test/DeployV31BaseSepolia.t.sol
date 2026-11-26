@@ -10,6 +10,7 @@ import {DeployBaseSepoliaHarness} from "./DeployBaseSepolia.t.sol";
 import {ProofStatus} from "../src/ProofCheck.sol";
 import {ProofCheckHarness} from "./mocks/Mocks.sol";
 import {VerifierRegistry} from "../src/VerifierRegistry.sol";
+import {ProofValidator8004} from "../src/ProofValidator8004.sol";
 import {IdentityRegistryUpgradeable} from "lib/erc-8004-contracts/contracts/IdentityRegistryUpgradeable.sol";
 import {ValidationRegistryUpgradeable} from "lib/erc-8004-contracts/contracts/ValidationRegistryUpgradeable.sol";
 import {AuthCaptureEscrow} from "lib/commerce-payments/src/AuthCaptureEscrow.sol";
@@ -20,6 +21,7 @@ import {ERC3009PaymentCollector} from "lib/commerce-payments/src/collectors/ERC3
 contract DeployV31BaseSepoliaHarness is DeployV31BaseSepolia {
     Expected internal expected;
     V30 internal old;
+    VerifierRegistry internal v31Registry;
 
     function expect(Expected memory c, V30 memory o) external {
         expected = c;
@@ -32,6 +34,14 @@ contract DeployV31BaseSepoliaHarness is DeployV31BaseSepolia {
 
     function _v30() internal view override returns (V30 memory) {
         return old;
+    }
+
+    function expectV31Registry(VerifierRegistry r) external {
+        v31Registry = r;
+    }
+
+    function _v31Registry() internal view override returns (VerifierRegistry) {
+        return v31Registry;
     }
 }
 
@@ -94,7 +104,6 @@ contract DeployV31BaseSepoliaTest is ProofCoreBase {
         assertEq(MockERC3009(USDC).balanceOf(address(d.channel)), 1, "ChannelSettlement seed");
         assertEq(MockERC3009(USDC).balanceOf(DEFAULT_SENDER), 0, "all four units came from the deployer");
         assertTrue(address(d.solo) != address(v30.solo) && address(d.operator) != address(v30.operator), "new");
-        assertEq(address(d.validator.validationRegistry()), chain.validationRegistry, "validator's ERC-8004 registry");
         assertEq(address(d.operator.escrow()), ESCROW, "operator escrow");
     }
 
@@ -125,6 +134,22 @@ contract DeployV31BaseSepoliaTest is ProofCoreBase {
         script.expect(chain, DeployV31BaseSepolia.V30(v30.registry, v30.k8Verifier, v30.k8Verifier));
         vm.expectRevert(bytes("preflight: solo verifier address"));
         script.runV31();
+    }
+
+    /// The second step deploys the validator into the registry that holds the v3.1 entries.
+    function test_deploys_the_validator_after_the_v31_entries() public {
+        DeployV31BaseSepolia.DeploymentV31 memory d = script.runV31();
+        script.expectV31Registry(d.registry);
+        ProofValidator8004 validator = script.runV31Validator();
+        assertEq(address(validator.registry()), address(d.registry), "validator registry");
+        assertEq(address(validator.validationRegistry()), chain.validationRegistry, "validator's ERC-8004 registry");
+        assertTrue(address(validator) != address(v30.validator), "new");
+    }
+
+    function test_the_validator_step_refuses_a_registry_without_the_v31_entries() public {
+        script.expectV31Registry(v30.registry);
+        vm.expectRevert(bytes("preflight: v3.1 entries missing"));
+        script.runV31Validator();
     }
 
     function test_refuses_to_run_twice() public {

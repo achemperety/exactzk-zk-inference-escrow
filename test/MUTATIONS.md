@@ -937,7 +937,7 @@ Run on 2026-11-27. 9 mutations, each run with the full suite (`forge test`) and 
 
 ### The v3.1 deployment script (`script/DeployV31BaseSepolia.s.sol`, `--match-path test/DeployV31BaseSepolia.t.sol`)
 
-Run on 2026-11-27, restored afterwards; the suite has 7 tests and all pass on the clean tree.
+Run on 2026-11-27, restored afterwards; the suite has 9 tests and all pass on the clean tree (DV1–DV5 were run when it had 7, DV6 with 9).
 
 | Id | Deliberate breakage | Tests that failed |
 |---|---|---|
@@ -946,3 +946,4 @@ Run on 2026-11-27, restored afterwards; the suite has 7 tests and all pass on th
 | DV3 | the solo entry registered with the K=8 allowance | 3: `test_deploys_v31_into_the_v30_registry`, `test_refuses_to_run_twice`, `test_the_new_solo_entry_reports_a_wrong_output_as_invalid` (all `check: solo verifier id`) |
 | DV4 | no check that the v3.1 entries are new | 1: `test_refuses_to_run_twice` (`AlreadyRegistered` instead of the preflight message) |
 | DV5 | the solo verifier's address not compared with the registered entry | 1: `test_refuses_a_verifier_that_is_not_the_pinned_one` |
+| DV6 | the validator step does not check that the v3.1 entries exist | 1: `test_the_validator_step_refuses_a_registry_without_the_v31_entries` (`next call did not revert as expected`) |

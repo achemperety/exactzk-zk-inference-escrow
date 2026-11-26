@@ -15,16 +15,19 @@ import {IValidationRegistry} from "../src/IValidationRegistry.sol";
 import {AuthCaptureProofOperator} from "../src/AuthCaptureProofOperator.sol";
 import {IAuthCaptureEscrow} from "../src/IAuthCaptureEscrow.sol";
 
-/// Deploys v3.1 to Base Sepolia (docs/known-issues/2026-11-out-of-gas-as-invalid.md):
+/// Deploys v3.1 to Base Sepolia (docs/known-issues/2026-11-out-of-gas-as-invalid.md), in two steps:
 ///
 ///     forge script script/DeployV31BaseSepolia.s.sol --sig "runV31()" --rpc-url <rpc> --account <keystore>             (simulation)
 ///     forge script script/DeployV31BaseSepolia.s.sol --sig "runV31()" --rpc-url <rpc> --account <keystore> --broadcast --slow
+///     forge script script/DeployV31BaseSepolia.s.sol --sig "runV31Validator()" --rpc-url <rpc> --account <keystore> --broadcast --slow
 ///
 /// It reuses what v3.0.0-testnet deployed and is not affected: the registry (append-only) and the two
 /// pinned EZKL verifiers, read from deployments/base-sepolia.json and checked before anything is sent.
 /// It deploys `Halo2EzklAdapterV2`, registers the two entries sized for the 1/16 rule in the existing
 /// registry, and deploys a new version of every contract that embeds `ProofCheck`, with the same
 /// constructor arguments as v3.0 and the same one-unit USDC seed in each settlement contract.
+/// `runV31()` deploys all of them but `ProofValidator8004`; `runV31Validator()` deploys that one later,
+/// into the registry recorded in deployments/base-sepolia-v3.1.json, once its source on main is final.
 /// `run()` refuses, so that this file can never run the v3.0 deployment it inherits.
 contract DeployV31BaseSepolia is DeployBaseSepolia {
     struct V30 {
@@ -42,7 +45,6 @@ contract DeployV31BaseSepolia is DeployBaseSepolia {
         SoloSettlement solo;
         ChannelSettlement channel;
         ProofEvaluator8183 evaluator;
-        ProofValidator8004 validator;
         AuthCaptureProofOperator operator;
     }
 
@@ -76,12 +78,36 @@ contract DeployV31BaseSepolia is DeployBaseSepolia {
         require(IERC20(c.usdc).transfer(address(d.solo), SEED), "seed: SoloSettlement");
         require(IERC20(c.usdc).transfer(address(d.channel), SEED), "seed: ChannelSettlement");
         d.evaluator = new ProofEvaluator8183(d.registry);
-        d.validator = new ProofValidator8004(d.registry, IValidationRegistry(c.validationRegistry));
         d.operator = new AuthCaptureProofOperator(IAuthCaptureEscrow(c.escrow), d.registry);
         vm.stopBroadcast();
 
         _checkV31(c, d);
         _logV31(d);
+    }
+
+    /// The second step: `ProofValidator8004` against the registry that holds the v3.1 entries.
+    function runV31Validator() external returns (ProofValidator8004 validator) {
+        Expected memory c = _chain();
+        VerifierRegistry registry = _v31Registry();
+        _preflightChain(c);
+        require(
+            address(registry).codehash == keccak256(type(VerifierRegistry).runtimeCode),
+            "preflight: the registry's code is not VerifierRegistry"
+        );
+        require(registry.exists(SOLO_ID_V31) && registry.exists(K8_ID_V31), "preflight: v3.1 entries missing");
+        vm.startBroadcast();
+        validator = new ProofValidator8004(registry, IValidationRegistry(c.validationRegistry));
+        vm.stopBroadcast();
+
+        require(validator.registry() == registry, "check: validator registry");
+        require(address(validator.validationRegistry()) == c.validationRegistry, "check: validator's ERC-8004 registry");
+        console.log("ProofValidator8004 (v3.1)", address(validator));
+    }
+
+    /// The registry of the v3.1 deployment, from deployments/base-sepolia-v3.1.json.
+    function _v31Registry() internal view virtual returns (VerifierRegistry) {
+        string memory j = vm.readFile("deployments/base-sepolia-v3.1.json");
+        return VerifierRegistry(vm.parseJsonAddress(j, ".contracts.VerifierRegistry"));
     }
 
     /// What v3.0.0-testnet deployed and v3.1 reuses, from deployments/base-sepolia.json.
@@ -119,10 +145,6 @@ contract DeployV31BaseSepolia is DeployBaseSepolia {
         require(d.solo.registry() == d.registry, "check: SoloSettlement registry");
         require(d.channel.registry() == d.registry, "check: ChannelSettlement registry");
         require(d.evaluator.registry() == d.registry, "check: evaluator registry");
-        require(d.validator.registry() == d.registry, "check: validator registry");
-        require(
-            address(d.validator.validationRegistry()) == c.validationRegistry, "check: validator's ERC-8004 registry"
-        );
         require(d.operator.registry() == d.registry, "check: operator registry");
         require(address(d.operator.escrow()) == c.escrow, "check: operator escrow");
     }
@@ -158,7 +180,6 @@ contract DeployV31BaseSepolia is DeployBaseSepolia {
         console.log("SoloSettlement          ", address(d.solo));
         console.log("ChannelSettlement       ", address(d.channel));
         console.log("ProofEvaluator8183      ", address(d.evaluator));
-        console.log("ProofValidator8004      ", address(d.validator));
         console.log("AuthCaptureProofOperator", address(d.operator));
     }
 }

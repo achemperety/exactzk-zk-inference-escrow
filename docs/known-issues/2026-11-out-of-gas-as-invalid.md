@@ -85,6 +85,8 @@ With these entries a valid proof stays `Valid` until a repricing adds more than 
 - `ProofValidator8004`
 - `AuthCaptureProofOperator`
 
+`ProofValidator8004` is deployed in a second step, later than the other four, so that the source it is verified against is the one on `main`. Until then the `v3.0.0-testnet` validator stays in use.
+
 Not redeployed:
 
 - `VerifierRegistry` does not embed `ProofCheck`. It is append-only, and the new entries are added to it.
@@ -107,11 +109,12 @@ It also checks what it reuses:
 - that both v3.0 entries are registered, with the pinned verifiers;
 - that the v3.1 entries do not exist yet.
 
-`run()` refuses, so that this file can never run the v3.0 deployment it inherits. `test/DeployV31BaseSepolia.t.sol` runs it against local copies, including one test for each refusal.
+`run()` refuses, so that this file can never run the v3.0 deployment it inherits. `runV31()` deploys everything but `ProofValidator8004`. `runV31Validator()`, the second step, deploys the validator into the registry recorded for v3.1, after checking the chain again and that both v3.1 entries exist. `test/DeployV31BaseSepolia.t.sol` runs both against local copies, including one test for each refusal.
 
 ```
 forge script script/DeployV31BaseSepolia.s.sol --sig "runV31()" --rpc-url <rpc> --account <keystore>                      (simulation)
 forge script script/DeployV31BaseSepolia.s.sol --sig "runV31()" --rpc-url <rpc> --account <keystore> --broadcast --slow
+forge script script/DeployV31BaseSepolia.s.sol --sig "runV31Validator()" --rpc-url <rpc> --account <keystore> --broadcast --slow
 ```
 
 **Rehearsal, 2026-11-27.** On a local fork of Base Sepolia (block 64,015,747), sent from the v3.0 deployer's address with Anvil's impersonation, nothing sent to the chain. All 10 transactions succeeded, 8,454,955 gas:
@@ -126,10 +129,10 @@ forge script script/DeployV31BaseSepolia.s.sol --sig "runV31()" --rpc-url <rpc> 
 | 6 | seed `SoloSettlement`, 1 unit of USDC | 62,135 |
 | 7 | seed `ChannelSettlement`, 1 unit of USDC | 62,135 |
 | 8 | `ProofEvaluator8183` | 1,234,508 |
-| 9 | `ProofValidator8004` | 950,142 |
+| 9 | `ProofValidator8004` (second step) | 950,142 |
 | 10 | `AuthCaptureProofOperator` | 1,568,015 |
 
-The same run as a dry run against the chain itself passed every preflight check. Forge set its gas limits to 11,043,437 in total (its 1.3 margin), at an estimated 0.0101 gwei: about 0.00011 ETH, before the L1 data fee. The v3.0 deployment, 16.9 million gas, cost 0.000101 ETH in all. The v3.0 deployer holds enough ETH and USDC.
+Without the validator, the first step is 9 transactions and 7,504,813 gas. Its dry run against the chain itself on 2026-11-27 passed every preflight check: forge estimated 9,808,253 gas at 0.0101 gwei, 0.000099 ETH. An earlier dry run of all ten transactions, with gas limits of 11,043,437 in total (forge's 1.3 margin), also passed. Both estimates are before the L1 data fee. The v3.0 deployment, 16.9 million gas, cost 0.000101 ETH in all. The v3.0 deployer holds enough ETH and USDC.
 
 The new ids:
 
@@ -139,7 +142,7 @@ The new ids:
 **After the deployment:**
 
 1. Record the new addresses and ids in `deployments/` as a v3.1 section next to v3.0's.
-2. Verify the six new contracts on Sourcify and Blockscout, as for v3.0.
+2. Verify the new contracts on Sourcify and Blockscout, as for v3.0.
 3. Re-measure the figures in `MEASUREMENTS.md` on the 3.1 code.
 4. Point the quickstart and the client's known verifier ids at the new entries.
 5. Tag `v3.1.0-testnet`.
