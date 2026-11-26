@@ -91,7 +91,7 @@ contract DeployBaseSepolia is Script {
     /// PUSH1 11, CODESIZE, SUB, DUP1, PUSH1 11, RETURNDATASIZE, CODECOPY, RETURNDATASIZE, RETURN.
     bytes internal constant RAW_RUNTIME_PREFIX = hex"600b380380600b3d393df3";
 
-    function run() external returns (Deployment memory d) {
+    function run() external virtual returns (Deployment memory d) {
         Expected memory c = _chain();
         vm.startBroadcast();
         (, d.deployer,) = vm.readCallers();
@@ -136,6 +136,14 @@ contract DeployBaseSepolia is Script {
     }
 
     function _preflight(Expected memory c, address deployer) internal view {
+        _preflightChain(c);
+        require(
+            IERC20(c.usdc).balanceOf(deployer) >= 2 * SEED, "preflight: deployer needs 2 units of USDC for the seeds"
+        );
+    }
+
+    /// The chain's contracts this deployment depends on are the ones pinned above.
+    function _preflightChain(Expected memory c) internal view {
         require(block.chainid == c.chainId, "preflight: wrong chain");
         require(
             _implementation(c.validationRegistry) == c.validationImplementation,
@@ -153,9 +161,6 @@ contract DeployBaseSepolia is Script {
         require(c.collector.codehash == c.collectorCodeHash, "preflight: collector code differs");
         require(
             ICollectorLink(c.collector).authCaptureEscrow() == c.escrow, "preflight: collector serves another escrow"
-        );
-        require(
-            IERC20(c.usdc).balanceOf(deployer) >= 2 * SEED, "preflight: deployer needs 2 units of USDC for the seeds"
         );
     }
 
