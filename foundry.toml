@@ -7,7 +7,8 @@ libs = ["lib"]
 # OpenZeppelin is pinned to the v5.7.0 release commit by the submodule; the contracts in
 # src/ use its signature helpers and SafeERC20.
 #
-# Third-party reference contracts, used only by tests (test/external/README.md): the ERC-8004
+# Third-party reference contracts, used by tests (test/external/README.md; the ERC-8183 job contract
+# was also deployed once, test-only, for docs/test-vectors/): the ERC-8004
 # registries (lib/erc-8004-contracts) and the ERC-8183 job contract (test/external/erc8183).
 # They are built against OpenZeppelin v5.4.0, the version the ERC-8004 repository's lockfile
 # pins: contracts-upgradeable v5.4.0 and the contracts release its own submodule pins. The

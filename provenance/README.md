@@ -2,11 +2,12 @@
 
 This repository starts from a new history. The files below were carried over from the private repository that held the previous version, and nothing else was. Each was copied by content and compared with its source by SHA-256 on 2026-11-22, except one input file carried over on 2026-11-24 (marked below).
 
-Three lists of hashes live in this folder:
+Four lists of hashes live in this folder:
 
 | File | What it lists | Checked by |
 |---|---|---|
 | `COPIED_FILES.sha256` | every carried-over file as it is in this repository | `scripts/hygiene_scan.sh`, on every run |
+| `TEST_VECTORS.sha256` | the test vectors in `docs/test-vectors/`, which hold values read from the chain; not carried over | `scripts/hygiene_scan.sh`, on every run |
 | `SRS.sha256` | the two structured reference strings, which are not stored here | `scripts/fetch_srs.sh`, before it puts a downloaded file in place |
 | `SOURCE_ORIGINALS.sha256` | the source repository's version of each file that was changed after copying | nothing here: those versions are not in this repository |
 

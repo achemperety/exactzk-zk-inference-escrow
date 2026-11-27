@@ -1,0 +1,167 @@
+{
+  "notes": [
+    "One ERC-8183 job in the shape of ERC-8505's assets/erc-8505/vectors.json (ethereum/ERCs PR #2185 at 9f49fb9): delivered, no proof presented to its evaluator, expired, refunded.",
+    "The source descriptor is the ERC's ERC-8183 template, with this job contract and testnet USDC. fromBlock is the block that deployed the job contract's proxy.",
+    "logs holds every log of a declared event the source emitted for the task, read from the chain. The job also emitted BudgetSet and JobExpired, which the descriptor does not declare. Every log's data is one word per non-indexed parameter, so it is not cut.",
+    "head is null: the head fields are inputs of the ERC-8505 writer, so bytes, feedbackHash and file are left out with it.",
+    "README.md in this folder lists every transaction and the spec lines the expected result was checked against."
+  ],
+  "sources": {
+    "erc8183-reference-base-sepolia": {
+      "chainId": 84532,
+      "contract": "0x4EccB1c56e7C573f7dC7500BdbAf13B6fEF7cb33",
+      "asset": "eip155:84532/erc20:0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      "fromBlock": 64281327,
+      "finality": "finalized",
+      "events": [
+        {
+          "step": "assigned",
+          "event": "JobCreated(uint256 indexed jobId, address indexed client, address indexed provider, address evaluator, uint256 expiredAt, address hook)",
+          "fields": {
+            "task": "jobId",
+            "worker": "provider"
+          }
+        },
+        {
+          "step": "assigned",
+          "event": "ProviderSet(uint256 indexed jobId, address indexed provider)",
+          "fields": {
+            "task": "jobId",
+            "worker": "provider"
+          }
+        },
+        {
+          "step": "funded",
+          "event": "JobFunded(uint256 indexed jobId, address indexed client, uint256 amount)",
+          "fields": {
+            "task": "jobId",
+            "client": "client",
+            "amount": "amount"
+          }
+        },
+        {
+          "step": "delivered",
+          "event": "JobSubmitted(uint256 indexed jobId, address indexed provider, bytes32 deliverable)",
+          "fields": {
+            "task": "jobId",
+            "worker": "provider",
+            "result": "deliverable"
+          },
+          "actor": "worker"
+        },
+        {
+          "step": "verdict",
+          "event": "JobCompleted(uint256 indexed jobId, address indexed evaluator, bytes32 reason)",
+          "fields": {
+            "task": "jobId",
+            "accepted": true,
+            "ref": "reason",
+            "evaluator": "evaluator"
+          }
+        },
+        {
+          "step": "verdict",
+          "event": "JobRejected(uint256 indexed jobId, address indexed rejector, bytes32 reason)",
+          "fields": {
+            "task": "jobId",
+            "accepted": false,
+            "ref": "reason",
+            "evaluator": "rejector"
+          }
+        },
+        {
+          "step": "paid",
+          "event": "PaymentReleased(uint256 indexed jobId, address indexed provider, uint256 amount)",
+          "fields": {
+            "task": "jobId",
+            "worker": "provider",
+            "to": "provider",
+            "amount": "amount"
+          }
+        },
+        {
+          "step": "refunded",
+          "event": "Refunded(uint256 indexed jobId, address indexed client, uint256 amount)",
+          "fields": {
+            "task": "jobId",
+            "to": "client",
+            "amount": "amount"
+          }
+        }
+      ]
+    }
+  },
+  "valid": [
+    {
+      "name": "base sepolia job 1: delivered, no proof presented, expired, refunded",
+      "network": "Base Sepolia (chain id 84532)",
+      "source": "erc8183-reference-base-sepolia",
+      "task": "1",
+      "terminalTime": 1795778618,
+      "head": null,
+      "logs": [
+        {
+          "address": "0x4eccb1c56e7c573f7dc7500bdbaf13b6fef7cb33",
+          "blockNumber": 64281449,
+          "transactionHash": "0x3f3ede9c53dfe788b785904e8742cee9d51a3eee4a9ffde78ce7f7fe6cc7b4bd",
+          "logIndex": 0,
+          "topics": [
+            "0xb0f0239bfdd96453e24733e18bfc24b70d8fadf123dd977473518dd577ee79b9",
+            "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "0x0000000000000000000000004b4422b91f0a0331021b6b12a11c3c82925b5241",
+            "0x0000000000000000000000007091d27ab1fe6b3a3363d2bab2a926890d56ca7f"
+          ],
+          "data": "0x0000000000000000000000009a9efa2f42dd72e7c479ee8530bf5f9561033b99000000000000000000000000000000000000000000000000000000006b0968040000000000000000000000000000000000000000000000000000000000000000",
+          "dataHash": "0x1dda7c589c79353941f6031bf91626dd7aa6f98fad587d1b10edddc5ad29f66c"
+        },
+        {
+          "address": "0x4eccb1c56e7c573f7dc7500bdbaf13b6fef7cb33",
+          "blockNumber": 64281465,
+          "transactionHash": "0xa6f0feb743175b1bff95b957ddfbfd0db49008c97fcbb298f1b3b86060478544",
+          "logIndex": 11,
+          "topics": [
+            "0xe3fbcc1ea1bdc559ec7f0347efde7655e58b5f45a30b0e4470a583c3ef5496b3",
+            "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "0x0000000000000000000000004b4422b91f0a0331021b6b12a11c3c82925b5241"
+          ],
+          "data": "0x0000000000000000000000000000000000000000000000000000000000002710",
+          "dataHash": "0x1d460b64f7b8ba0be629afe9b4ae65333b379985d7ea823ff4c0b8c3b5102153"
+        },
+        {
+          "address": "0x4eccb1c56e7c573f7dc7500bdbaf13b6fef7cb33",
+          "blockNumber": 64281470,
+          "transactionHash": "0x5a38a23f5d99aa4062a0e76a709e9bfb4d4eab42327ec5178ceebe2d6ca336e0",
+          "logIndex": 0,
+          "topics": [
+            "0x80c17db79857f338a6a6df68a6883ecc0ce78e2202fe61ed979733573f40538e",
+            "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "0x0000000000000000000000007091d27ab1fe6b3a3363d2bab2a926890d56ca7f"
+          ],
+          "data": "0x4b060b3f8e9d1f3b68dce2caec32822cc2bd3c3a1a7608d3c4c77a924ee605ac",
+          "dataHash": "0x66294216f488305feb0dc3e91540aab2fb99a4e1fd648d9fafeefbbe913eb67c"
+        },
+        {
+          "address": "0x4eccb1c56e7c573f7dc7500bdbaf13b6fef7cb33",
+          "blockNumber": 64283748,
+          "transactionHash": "0xb922367ac1260e6c7609af31e969664ec5c9490dd63ec33b89d56ef09765cff9",
+          "logIndex": 8,
+          "topics": [
+            "0x7ca5472b7ea78c2c0141c5a12ee6d170cf4ce8ed06be3d22c8252ddfc7a6a2c4",
+            "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "0x0000000000000000000000004b4422b91f0a0331021b6b12a11c3c82925b5241"
+          ],
+          "data": "0x0000000000000000000000000000000000000000000000000000000000002710",
+          "dataHash": "0x1d460b64f7b8ba0be629afe9b4ae65333b379985d7ea823ff4c0b8c3b5102153"
+        }
+      ],
+      "expect": {
+        "outcome": "lapsed",
+        "entry": {
+          "tag1": "work.lapsed",
+          "tag2": "delivered",
+          "value": 0
+        }
+      }
+    }
+  ]
+}

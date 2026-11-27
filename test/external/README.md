@@ -1,6 +1,6 @@
 # Third-party reference contracts
 
-The ERC-8183 evaluator (`src/ProofEvaluator8183.sol`) and the ERC-8004 validator (`src/ProofValidator8004.sol`) are tested against the reference contracts that each ERC points to. Both are built here from source. They are used only by tests and are never deployed from this repository.
+The ERC-8183 evaluator (`src/ProofEvaluator8183.sol`) and the ERC-8004 validator (`src/ProofValidator8004.sol`) are tested against the reference contracts that each ERC points to. Both are built here from source and used by tests. One exception was deployed: the ERC-8183 job contract, once, test-only, on the testnet, for an ERC-8505 test vector (below). Nothing else here is deployed from this repository.
 
 ## ERC-8183: the job contract
 
@@ -12,6 +12,7 @@ The ERC-8183 evaluator (`src/ProofEvaluator8183.sol`) and the ERC-8004 validator
 | Extraction | Each file is the lines between the ```` ```solidity ```` fence and the closing fence under its heading, byte for byte, with one newline at the end. Nothing is changed, so the files have no licence line, as in the ERC. `forge fmt` skips them. |
 | Built with | OpenZeppelin `contracts-upgradeable` v5.4.0 and `contracts` v5.4.0 (the ERC names no version; this is the version the ERC-8004 repository below uses). It compiles unchanged. |
 | Deployed in tests | `ReferenceDeploy.agenticCommerce`: the implementation behind an ERC-1967 proxy, initialised with the test token as payment token. The test contract holds the admin roles and sets an evaluator fee of 5 % (`setEvaluatorFee(500)`). |
+| On the testnet | Deployed once, test-only, by `script/Vector8183Expired.s.sol`, for the job in [`docs/test-vectors/`](../../docs/test-vectors/README.md): the same build behind the same proxy, testnet USDC as payment token, no fees, both admin roles renounced after initialising. Addresses in `deployments/`, in the test-only ERC-8183 record |
 
 Every test in `test/ProofEvaluator8183.t.sol` and every evaluator row of `test/StandardsGas.t.sol` uses this contract. A minimal job contract written from the ERC's text was not needed. None of the disagreements below blocks a test of the evaluator without a hook.
 

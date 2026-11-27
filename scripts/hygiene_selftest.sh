@@ -14,15 +14,19 @@ SCAN="bash scripts/hygiene_scan.sh"
 PLANT="zz_hygiene_selftest_plant.txt"
 DEPLOY_PLANT="deployments/zz_hygiene_selftest_plant.json"
 SPEC_PLANT="specs/zz_hygiene_selftest_plant.md"
+VECTOR_PLANT="docs/test-vectors/zz_hygiene_selftest_plant.json"
+PINNED_VECTOR="docs/test-vectors/erc8505-erc8183-lapsed-after-delivery.json"
+VECTOR_BACKUP="$(mktemp)"
 PINNED_VICTIM="measurements/2026-09-18-steady/proof2_status.json"
 BACKUP="$(mktemp)"
 REF="$(mktemp -d)"
 MADE_DEPLOYMENTS=0
 
 cleanup() {
-  rm -f "$PLANT" "$PLANT.bin" "$DEPLOY_PLANT" "$SPEC_PLANT"
+  rm -f "$PLANT" "$PLANT.bin" "$DEPLOY_PLANT" "$SPEC_PLANT" "$VECTOR_PLANT"
   [ -s "$BACKUP" ] && cp "$BACKUP" "$PINNED_VICTIM"
-  rm -f "$BACKUP"; rm -rf "$REF"
+  [ -s "$VECTOR_BACKUP" ] && cp "$VECTOR_BACKUP" "$PINNED_VECTOR"
+  rm -f "$BACKUP" "$VECTOR_BACKUP"; rm -rf "$REF"
   [ "$MADE_DEPLOYMENTS" = 1 ] && rmdir deployments 2>/dev/null
   return 0
 }
@@ -61,6 +65,18 @@ rm -f "$PLANT"
 printf 'Reference: 0x%s\n' "$(rand_hex 20)" > "$SPEC_PLANT"
 expect "an address not in deployments/ is caught in specs/" 1 "FAIL address   $SPEC_PLANT:1"
 rm -f "$SPEC_PLANT"
+
+printf '{"contract": "%s"}\n' "$ADDR" > "$VECTOR_PLANT"
+expect "an address listed in deployments/ is accepted in docs/test-vectors/" 0 "hygiene scan: OK"
+printf '{"contract": "0x%s"}\n' "$(rand_hex 20)" > "$VECTOR_PLANT"
+expect "an address not in deployments/ is caught in docs/test-vectors/" 1 "FAIL address   $VECTOR_PLANT:1"
+printf '{"topic": "0x%s"}\n' "$(rand_hex 32)" > "$VECTOR_PLANT"
+expect "a 32-byte value in an unpinned test vector is caught" 1 "FAIL value32   $VECTOR_PLANT:1"
+rm -f "$VECTOR_PLANT"
+cp "$PINNED_VECTOR" "$VECTOR_BACKUP"
+printf ' ' >> "$PINNED_VECTOR"
+expect "a pinned test vector that changed is caught" 1 "FAIL pinned    $PINNED_VECTOR"
+cp "$VECTOR_BACKUP" "$PINNED_VECTOR"
 
 printf '%s\n' "$ADDR" > "$REF/record.txt"
 out="$(HYGIENE_PRIVATE_REF="$REF" $SCAN 2>&1)"; rc=$?

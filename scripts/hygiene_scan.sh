@@ -2,18 +2,22 @@
 # Hygiene scan. Fails if something that should never be published has entered
 # the tree outside lib/:
 #
-#   pinned     a file listed in provenance/COPIED_FILES.sha256 is missing or changed
+#   pinned     a file listed in provenance/COPIED_FILES.sha256 or provenance/TEST_VECTORS.sha256
+#              is missing or changed
 #   binary     a binary file that is not pinned
-#   address    0x + 40 hex, unless allow-listed or inside deployments/; in specs/, also
-#              an address that a deployments/*.json file lists (the spec's reference
-#              implementation names the deployed contracts)
+#   address    0x + 40 hex, unless allow-listed or inside deployments/; in specs/ and
+#              docs/test-vectors/, also an address that a deployments/*.json file lists
+#              (the spec's reference implementation names the deployed contracts; a test
+#              vector names the contracts its logs come from)
 #   value32    64 hex (with or without 0x) in a file that is not pinned, unless
 #              allow-listed or equal to a SHA-256 listed in a provenance/*.sha256 file
 #   keyword    sepolia, basescan, alchemy, infura, private_key, or a PEM private-key
 #              header, unless that keyword is allow-listed for that path
 #   home-path  an absolute path into somebody's home directory
 #
-# deployments/ is where deployed addresses are recorded; specs/ may repeat them. Everywhere
+# deployments/ is where deployed addresses are recorded; specs/ and docs/test-vectors/ may
+# repeat them. A test vector holds 32-byte values read from the chain (topics, data, hashes),
+# so it is pinned by SHA-256 in provenance/TEST_VECTORS.sha256 instead of allow-listed. Everywhere
 # else an address must be a published constant listed in scripts/hygiene_allowlist.txt.
 #
 # Optional: HYGIENE_PRIVATE_REF=/path/to/a/private/tree makes the scan also fail if
@@ -29,11 +33,13 @@ cd "$ROOT"
 
 ALLOW="scripts/hygiene_allowlist.txt"
 PINNED="provenance/COPIED_FILES.sha256"
+VECTORS="provenance/TEST_VECTORS.sha256"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 [ -f "$ALLOW" ] || { echo "missing $ALLOW"; exit 2; }
 [ -f "$PINNED" ] || { echo "missing $PINNED"; exit 2; }
+[ -f "$VECTORS" ] || { echo "missing $VECTORS"; exit 2; }
 
 if command -v sha256sum >/dev/null 2>&1; then SHA="sha256sum"; else SHA="shasum -a 256"; fi
 
@@ -49,12 +55,12 @@ done > "$TMP/files"
 : > "$TMP/fail"
 
 # ── pinned ───────────────────────────────────────────────────────────────────
-awk '{print $2}' "$PINNED" | sort -u > "$TMP/pinned_paths"
+awk '{print $2}' "$PINNED" "$VECTORS" | sort -u > "$TMP/pinned_paths"
 # Every SHA-256 recorded in provenance/ is a known value, including the reference
 # strings (SRS.sha256) and the source versions of files changed after copying.
 cat provenance/*.sha256 | awk '{print tolower($1)}' | sort -u > "$TMP/pinned_hashes"
-$SHA -c "$PINNED" > "$TMP/shacheck" 2>&1 || true
-# Addresses recorded in deployments/, which specs/ may repeat.
+cat "$PINNED" "$VECTORS" | $SHA -c - > "$TMP/shacheck" 2>&1 || true
+# Addresses recorded in deployments/, which specs/ and docs/test-vectors/ may repeat.
 cat deployments/*.json 2>/dev/null | grep -oE '0x[0-9a-fA-F]{40}' | tr 'A-F' 'a-f' | sort -u > "$TMP/deployed" || true
 grep -v ': OK$' "$TMP/shacheck" | grep ': ' | sed 's/^/FAIL pinned    /' >> "$TMP/fail" || true
 
@@ -99,7 +105,7 @@ FILENAME ~ /hex$/ {
   if (length(v) == 40 && had0x) {
     if (("0x" v) in addr) next
     if ($1 ~ /^deployments\//) next
-    if ($1 ~ /^specs\// && (("0x" v) in deployed)) next
+    if ($1 ~ /^(specs|docs\/test-vectors)\// && (("0x" v) in deployed)) next
     print "FAIL address   " $1 ":" $2 ": address is not allow-listed (0x" substr(v, 1, 6) "…)"
   } else if (length(v) == 64) {
     if (v in hash) next

@@ -191,3 +191,21 @@ hash 0x46b51e376a9156715635ec2f4ac5f6d6cd3699dcf910ae1012534c80bdbada68  # kecca
 hash 0xc12941bd560d8fed9b25a71242139c18d19ae41dc5ab57ecb925b0c3558ae197  # SHA-256 of the verifier source generated from that key
 hash 0xc876948563dd1d921da114f0ff30e8e2cee7b420e8b48f96e1fe57db6270afbe  # keccak256 of that verifier's runtime bytecode, metadata trailer removed
 kw sepolia measurements/2026-11-24-verify-entry/*  # results of comparing the testnet registry entries; they name the public endpoint read
+
+# ── Testnet transactions: the ERC-8505 test vector job (deployments/base-sepolia-erc8183-test.json) ──
+hash 0xa46f958afc0a14d8bbeeeb0540031e0a2b0d0e50338b532fb262f4f8b42649d9  # Base Sepolia transaction, ERC-8183 test job: ETH to the client
+hash 0x33490d18df2a85790a9bd4da7cf11c065e5ad97525fc4bbca1bc9c27507ef006  # Base Sepolia transaction, ERC-8183 test job: ETH to the provider
+hash 0xee196db1c1ff17dd0ef4c0282c46b664ea50791d13541d9e31b5c0edf87ad37e  # Base Sepolia transaction, ERC-8183 test job: 0.01 USDC to the client
+hash 0xc79cab04f25ca84a2c85f0025a6ee05ae76eba57ef8ed3abf5e69a9aaf0d05df  # Base Sepolia transaction, ERC-8183 test job: create AgenticCommerce (implementation)
+hash 0xf6c615c25e0ad625629e4a20a44ba5564d606aa9bf372747e5b9106021765de2  # Base Sepolia transaction, ERC-8183 test job: create ERC1967Proxy, initialize(USDC, 0x000000000000000000000000000000000000dEaD)
+hash 0x55ad8c721839f15305b05cda8782ce19ad7cdfdca24b24e3ea35368d9b1842d9  # Base Sepolia transaction, ERC-8183 test job: renounceRole(ADMIN_ROLE)
+hash 0x3b233c6cffc81e4593154b3e627d90e2dd0f281fe19e72c988b9063c21880f12  # Base Sepolia transaction, ERC-8183 test job: renounceRole(DEFAULT_ADMIN_ROLE)
+hash 0x3f3ede9c53dfe788b785904e8742cee9d51a3eee4a9ffde78ce7f7fe6cc7b4bd  # Base Sepolia transaction, ERC-8183 test job: createJob (job 1)
+hash 0x40b7aee20b4ba37fba58f896d3f282fac0497ab8cc1d147e27df276870feb243  # Base Sepolia transaction, ERC-8183 test job: ProofEvaluator8183 v3.1: setTerms (job 1)
+hash 0xb69d2b9ea26dc3f3292315019077d9ba246d38a86053351aee6d80e80507511e  # Base Sepolia transaction, ERC-8183 test job: setBudget (job 1, 10000)
+hash 0x8b91f5239d10981e6f9a969502a9f87afb4d048a06708c79946526fc22e6dd26  # Base Sepolia transaction, ERC-8183 test job: USDC approve
+hash 0xa6f0feb743175b1bff95b957ddfbfd0db49008c97fcbb298f1b3b86060478544  # Base Sepolia transaction, ERC-8183 test job: fund (job 1)
+hash 0x5a38a23f5d99aa4062a0e76a709e9bfb4d4eab42327ec5178ceebe2d6ca336e0  # Base Sepolia transaction, ERC-8183 test job: submit (job 1)
+hash 0xb922367ac1260e6c7609af31e969664ec5c9490dd63ec33b89d56ef09765cff9  # Base Sepolia transaction, ERC-8183 test job: claimRefund (job 1)
+hash 8f2f07c44b34908d4b816c80e6e02989b83747a9c30c3758e7cd115386bd32a9  # SHA-256 of ERCS/erc-8505.md at ethereum/ERCs PR #2185, commit 9f49fb9, the text the test vector was checked against
+kw sepolia docs/test-vectors/*  # the test vectors name the testnet their logs come from; no endpoint
