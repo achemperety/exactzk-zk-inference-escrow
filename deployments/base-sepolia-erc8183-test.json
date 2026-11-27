@@ -1,0 +1,135 @@
+{
+  "network": "Base Sepolia",
+  "chainId": 84532,
+  "version": "test-only",
+  "commit": "c828a22 (script/Vector8183Expired.s.sol)",
+  "blocks": [
+    64281262,
+    64283748
+  ],
+  "date": "2026-11-27",
+  "note": "Test-only deployment for one ERC-8505 test vector (docs/test-vectors/). Not part of v3.1 and used by nothing else. The job contract is the ERC-8183 reference implementation as the ERC's text gives it (test/external/erc8183/AgenticCommerce.sol, OpenZeppelin v5.4.0) behind an ERC-1967 proxy: payment token testnet USDC, platform and evaluator fees zero, fee recipient 0x000000000000000000000000000000000000dEaD. The account that deployed it renounced ADMIN_ROLE and DEFAULT_ADMIN_ROLE right after initialising it, so nobody can upgrade it, change a fee or allow a hook. That account is the quickstart's testnet-only key and is not recorded here. The implementation's creation input equals this repository's build of the pinned source; the proxy's equals the local ERC1967Proxy build plus its constructor arguments. Neither was submitted to an explorer for source verification.",
+  "contracts": {
+    "AgenticCommerce (proxy, the job contract)": "0x4EccB1c56e7C573f7dC7500BdbAf13B6fEF7cb33",
+    "AgenticCommerce (implementation)": "0x1c5f6983eDeFD34932E90810603A03716c2A2C64",
+    "ProofEvaluator8183 (v3.1, deployments/base-sepolia-v3.1.json)": "0x9a9eFa2F42Dd72e7C479ee8530BF5f9561033b99"
+  },
+  "roles": {
+    "client": "0x4B4422B91f0A0331021b6B12A11c3c82925b5241",
+    "provider": "0x7091D27ab1FE6b3A3363d2bAb2a926890D56cA7f",
+    "note": "Fresh testnet-only addresses created for this job and used for nothing else."
+  },
+  "adminRoles": "renounced (transactions 6 and 7 below); hasRole(DEFAULT_ADMIN_ROLE, deployer) is false",
+  "jobs": [
+    {
+      "id": 1,
+      "status": "Expired",
+      "budget": "10000",
+      "expiredAt": 1795778564,
+      "vector": "docs/test-vectors/erc8505-erc8183-lapsed-after-delivery.json"
+    }
+  ],
+  "transactions": [
+    {
+      "what": "ETH to the client",
+      "from": "funder",
+      "block": 64281262,
+      "hash": "0xa46f958afc0a14d8bbeeeb0540031e0a2b0d0e50338b532fb262f4f8b42649d9",
+      "gasUsed": 21000
+    },
+    {
+      "what": "ETH to the provider",
+      "from": "funder",
+      "block": 64281266,
+      "hash": "0x33490d18df2a85790a9bd4da7cf11c065e5ad97525fc4bbca1bc9c27507ef006",
+      "gasUsed": 21000
+    },
+    {
+      "what": "0.01 USDC to the client",
+      "from": "funder",
+      "block": 64281270,
+      "hash": "0xee196db1c1ff17dd0ef4c0282c46b664ea50791d13541d9e31b5c0edf87ad37e",
+      "gasUsed": 62147
+    },
+    {
+      "what": "create AgenticCommerce (implementation)",
+      "from": "funder",
+      "block": 64281323,
+      "hash": "0xc79cab04f25ca84a2c85f0025a6ee05ae76eba57ef8ed3abf5e69a9aaf0d05df",
+      "gasUsed": 3105739
+    },
+    {
+      "what": "create ERC1967Proxy, initialize(USDC, 0x000000000000000000000000000000000000dEaD)",
+      "from": "funder",
+      "block": 64281327,
+      "hash": "0xf6c615c25e0ad625629e4a20a44ba5564d606aa9bf372747e5b9106021765de2",
+      "gasUsed": 248094
+    },
+    {
+      "what": "renounceRole(ADMIN_ROLE)",
+      "from": "funder",
+      "block": 64281331,
+      "hash": "0x55ad8c721839f15305b05cda8782ce19ad7cdfdca24b24e3ea35368d9b1842d9",
+      "gasUsed": 29620
+    },
+    {
+      "what": "renounceRole(DEFAULT_ADMIN_ROLE)",
+      "from": "funder",
+      "block": 64281335,
+      "hash": "0x3b233c6cffc81e4593154b3e627d90e2dd0f281fe19e72c988b9063c21880f12",
+      "gasUsed": 29236
+    },
+    {
+      "what": "createJob (job 1)",
+      "from": "client",
+      "block": 64281449,
+      "hash": "0x3f3ede9c53dfe788b785904e8742cee9d51a3eee4a9ffde78ce7f7fe6cc7b4bd",
+      "gasUsed": 239454
+    },
+    {
+      "what": "ProofEvaluator8183 v3.1: setTerms (job 1)",
+      "from": "client",
+      "block": 64281453,
+      "hash": "0x40b7aee20b4ba37fba58f896d3f282fac0497ab8cc1d147e27df276870feb243",
+      "gasUsed": 101782
+    },
+    {
+      "what": "setBudget (job 1, 10000)",
+      "from": "provider",
+      "block": 64281457,
+      "hash": "0xb69d2b9ea26dc3f3292315019077d9ba246d38a86053351aee6d80e80507511e",
+      "gasUsed": 80482
+    },
+    {
+      "what": "USDC approve",
+      "from": "client",
+      "block": 64281461,
+      "hash": "0x8b91f5239d10981e6f9a969502a9f87afb4d048a06708c79946526fc22e6dd26",
+      "gasUsed": 55425
+    },
+    {
+      "what": "fund (job 1)",
+      "from": "client",
+      "block": 64281465,
+      "hash": "0xa6f0feb743175b1bff95b957ddfbfd0db49008c97fcbb298f1b3b86060478544",
+      "gasUsed": 105133
+    },
+    {
+      "what": "submit (job 1)",
+      "from": "provider",
+      "block": 64281470,
+      "hash": "0x5a38a23f5d99aa4062a0e76a709e9bfb4d4eab42327ec5178ceebe2d6ca336e0",
+      "gasUsed": 39980
+    },
+    {
+      "what": "claimRefund (job 1)",
+      "from": "client",
+      "block": 64283748,
+      "hash": "0xb922367ac1260e6c7609af31e969664ec5c9490dd63ec33b89d56ef09765cff9",
+      "gasUsed": 84531
+    }
+  ],
+  "gasUsed": 4223623,
+  "costWei": 25529920750674,
+  "l1FeeWei": 188182750674
+}
