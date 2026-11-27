@@ -158,6 +158,7 @@ kw sepolia scripts/escrow_live_check.py  # names the testnet whose escrow it com
 kw sepolia test/DeployBaseSepolia.t.sol  # tests of the deployment script, named after it
 kw sepolia test/DeployBaseSepoliaFork.t.sol  # names the forked testnet; the endpoint comes from FORK_RPC_URL
 kw sepolia script/DeployV31BaseSepolia.s.sol  # the v3.1 deployment script for the testnet; the endpoint is passed on the command line
+kw sepolia script/Vector8183Expired.s.sol  # the ERC-8183 vector script for the testnet; the endpoint is passed on the command line
 kw sepolia test/DeployV31BaseSepolia.t.sol  # tests of the v3.1 deployment script, named after it
 kw sepolia docs/known-issues/*  # names the testnet whose deployment a known issue affects
 kw sepolia SECURITY.md  # names the testnet whose escrow was compared with the source
